@@ -1,20 +1,20 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import Inicio from './src/components/Inicio.jsx';
+import { NativeRouter, Route, Routes } from 'react-router-native';
+import LoginInspector from './src/components/LoginInspector.jsx';
+import LoginVecino from './src/components/LoginVecino.jsx';
+import Invitado from './src/components/Invitado.jsx';
+import GenerarClave from './src/components/GenerarClave.jsx';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+  return <>
+  <NativeRouter>
+    <Routes>
+      <Route exact path='/' element={<Inicio />} />
+      <Route path="/logininspector" element={<LoginInspector />} />
+      <Route path="/loginvecino" element={<LoginVecino />} />
+      <Route path="/invitado" element={<Invitado />} />
+      <Route path="/generarclave" element={<GenerarClave />} />
+    </Routes>
+  </NativeRouter>
+  </> 
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
