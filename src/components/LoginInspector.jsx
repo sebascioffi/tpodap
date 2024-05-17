@@ -1,11 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TextInput, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable } from 'react-native';
+import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
 const LoginInspector = () => {
+
+  const navigate = useNavigate();
+
   return (
     <View style={styles.container}>
+      <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
+        <Image
+          source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
+          style={styles.arrowImage}
+        />
+      </Pressable>
         <Image
         source={require('../imagenes/barrio.png')}
         style={styles.image}
@@ -26,9 +36,15 @@ const LoginInspector = () => {
       <Pressable style={styles.button}>
         <Text style={styles.buttonText}>Entrar</Text>
       </Pressable>
-      <Text style={styles.linkText}>Entrar como invitado</Text>
-      <Text style={styles.linkText}>Entrar como vecino</Text>
-      <Text style={styles.linkText}>Generar clave como vecino</Text>
+      <Link to="/invitado">
+        <Text style={styles.linkText}>Entrar como invitado</Text>
+      </Link>
+      <Link to="/loginvecino">
+        <Text style={styles.linkText}>Entrar como vecino</Text>
+      </Link>
+      <Link to="/generarclave">
+        <Text style={styles.linkText}>Generar clave como vecino</Text>
+      </Link>
     </View>
   );
 };
@@ -76,6 +92,15 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         textAlign: 'center',
         marginTop: 10,
+      },
+      backArrow: {
+        position: 'absolute',
+        top: 20, // Ajusta según sea necesario para que esté bien alineado
+        left: 20,
+      },
+      arrowImage: {
+        width: 24, // Ajusta el tamaño de la flecha según sea necesario
+        height: 24,
       },
   });
 

@@ -1,11 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable } from 'react-native';
+import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
 const GenerarClave = () => {
+
+  const navigate = useNavigate();
+
   return (
     <View style={styles.container}>
+      <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
+        <Image
+          source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
+          style={styles.arrowImage}
+        />
+      </Pressable>
         <Image
         source={require('../imagenes/barrio.png')}
         style={styles.image}
@@ -31,7 +41,9 @@ const GenerarClave = () => {
       <Pressable style={styles.button}>
         <Text style={styles.buttonText}>Generar clave</Text>
       </Pressable>
-      <Text style={styles.linkText}>Entrar como invitado</Text>
+      <Link to="/invitado">
+        <Text style={styles.linkText}>Entrar como invitado</Text>
+      </Link>
     </View>
   );
 };
@@ -79,6 +91,15 @@ const styles = StyleSheet.create({
       textDecorationLine: 'underline',
       textAlign: 'center',
       marginTop: 10,
+    },
+    backArrow: {
+      position: 'absolute',
+      top: 20, // Ajusta según sea necesario para que esté bien alineado
+      left: 20,
+    },
+    arrowImage: {
+      width: 24, // Ajusta el tamaño de la flecha según sea necesario
+      height: 24,
     },
 });
 
