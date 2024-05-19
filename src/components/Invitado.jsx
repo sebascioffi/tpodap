@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
-import { useNavigate } from 'react-router-native';
+import { View, Text, StyleSheet, Pressable, Image, Dimensions } from 'react-native';
+import { Link, useNavigate } from 'react-router-native';
+
+const screenWidth = Dimensions.get('window').width;
 
 const Invitado = () => {
 
@@ -14,7 +16,20 @@ const Invitado = () => {
           style={styles.arrowImage}
         />
       </Pressable>
-      <Text style={styles.title}>Invitado</Text>
+
+      <Link to="/comercios" component={Pressable} style={styles.button}>
+        <Text style={styles.buttonText}>Comercio</Text>
+      </Link>
+
+      <Image
+        source={require('../imagenes/barrio.png')}
+        style={styles.image}
+      />
+
+      <Link to="/servicios" component={Pressable} style={styles.button}>
+        <Text style={styles.buttonText}>Servicio</Text>
+      </Link>
+
     </View>
   );
 };
@@ -36,6 +51,24 @@ const styles = StyleSheet.create({
   arrowImage: {
     width: 24, // Ajusta el tamaño de la flecha según sea necesario
     height: 24,
+  },
+  image: {
+    width: screenWidth,
+    aspectRatio: 1.5,
+    resizeMode: 'contain',
+    marginBottom: 0,
+  },
+  button: {
+    backgroundColor: '#0066FF',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: '50%',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
   },
 });
 

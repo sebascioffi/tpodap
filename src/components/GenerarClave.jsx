@@ -25,18 +25,21 @@ const GenerarClave = () => {
         placeholder="Nombre y apellido"
         placeholderTextColor="darkgrey"
         textAlign="center"
+        selectionColor="transparent"
       />
       <TextInput
         style={styles.input}
         placeholder="DNI"
         placeholderTextColor="darkgrey"
         textAlign="center"
+        selectionColor="transparent"
       />
         <TextInput
         style={styles.input}
         placeholder="Dirección"
         placeholderTextColor="darkgrey"
         textAlign="center"
+        selectionColor="transparent"
       />
       <Pressable style={styles.button}>
         <Text style={styles.buttonText}>Generar clave</Text>
@@ -70,6 +73,7 @@ const styles = StyleSheet.create({
     color: 'darkgrey',
     fontSize: 16,
     textAlign: 'center',
+    outlineStyle: 'none',
   },
   button: {
     backgroundColor: 'black',

@@ -25,6 +25,7 @@ const LoginVecino = () => {
         placeholder="DNI"
         placeholderTextColor="darkgrey"
         textAlign="center"
+        selectionColor="transparent"
       />
       <TextInput
         style={styles.input}
@@ -32,6 +33,7 @@ const LoginVecino = () => {
         placeholderTextColor="darkgrey"
         secureTextEntry={true}
         textAlign="center"
+        selectionColor="transparent"
       />
       <Pressable style={styles.button}>
         <Text style={styles.buttonText}>Entrar</Text>
@@ -68,6 +70,7 @@ const styles = StyleSheet.create({
     color: 'darkgrey',
     fontSize: 16,
     textAlign: 'center',
+    outlineStyle: 'none',
   },
   button: {
     backgroundColor: 'black',
