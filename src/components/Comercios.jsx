@@ -1,46 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Dimensions, TextInput, ScrollView } from 'react-native';
-import { useNavigate } from 'react-router-native';
+import { Link, useNavigate } from 'react-router-native';
 import comercios from "../ejemploPromociones.js"
 
 const screenWidth = Dimensions.get('window').width;
 
 const Comercios = () => {
-    return (
-      <View style={styles.container}>
-        <View style={styles.inputContainer}>
-          <Image
-            source={require('../imagenes/lupa.png')} // Asegúrate de tener esta imagen en tu carpeta de imágenes
-            style={styles.icon}
-          />
-          <TextInput
-            style={[styles.input]} // Agrega estilos específicos para la web
-            placeholder="Buscar..."
-            placeholderTextColor="darkgrey"
-            selectionColor="transparent" // Esto elimina el borde amarillo al seleccionar el input
-          />
-        </View>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {comercios
-          .filter(com => com.tipo.toLowerCase() === 'comercio') // Filtra los comercios cuyo tipo es "comercio"
-          .map((com, index) => (
-            <View key={index} style={styles.comercioContainer}>
-              <Image
-                source={{ uri: com.urlImagenes[0] }}
-                style={styles.image}
-              />
-              <View style={styles.infoContainer}>
-                <Text style={styles.tipo}>{com.tipo}</Text>
-                <Text style={styles.nombre}>{com.nombre}</Text>
-                <Text style={styles.horario}>{com.horario}</Text>
-                <Text style={styles.descuento}>{com.descuento}</Text>
-              </View>
-            </View>
-          ))}
-      </ScrollView>
-      </View>
+
+    const [searchText, setSearchText] = useState('');
+
+    const filteredComercios = comercios.filter(com =>
+      com.tipo.toLowerCase() === 'comercio' && com.nombre.toLowerCase().includes(searchText.toLowerCase())
     );
-  };
+    
+    return (
+        <View style={styles.container}>
+          <View style={styles.inputContainer}>
+            <Image
+              source={require('../imagenes/lupa.png')} // Asegúrate de tener esta imagen en tu carpeta de imágenes
+              style={styles.icon}
+            />
+            <TextInput
+              style={styles.input} // Agrega estilos específicos para la web
+              placeholder="Buscar..."
+              placeholderTextColor="darkgrey"
+              selectionColor="transparent" // Esto elimina el borde amarillo al seleccionar el input
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            {filteredComercios.map((com, index) => (
+            <Link key={index} to={`/promocion/${com.id}`} component={View} style={styles.comercioContainer}>
+                <>
+                <Image
+                  source={{ uri: com.urlImagenes[0] }}
+                  style={styles.image}
+                />
+                <View style={styles.infoContainer}>
+                  <Text style={styles.tipo}>{com.tipo}</Text>
+                  <Text style={styles.nombre}>{com.nombre}</Text>
+                  <Text style={styles.horario}>{com.horario}</Text>
+                  <Text style={styles.descuento}>{com.descuento}</Text>
+                </View>
+                </>
+            </Link>
+            ))}
+          </ScrollView>
+        </View>
+      );
+    };
   
   const styles = StyleSheet.create({
     container: {

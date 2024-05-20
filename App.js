@@ -6,6 +6,7 @@ import Invitado from './src/components/Invitado.jsx';
 import GenerarClave from './src/components/GenerarClave.jsx';
 import Comercios from './src/components/Comercios.jsx';
 import Servicios from './src/components/Servicios.jsx';
+import Promocion from './src/components/Promocion.jsx';
 
 export default function App() {
   return <>
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/generarclave" element={<GenerarClave />} />
       <Route path="/comercios" element={<Comercios />} />
       <Route path="/servicios" element={<Servicios />} />
+      <Route path="/promocion/:id" element={<Promocion />} />
     </Routes>
   </NativeRouter>
   </> 
