@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
-const GenerarClave = () => {
+const LoginVecino = () => {
 
   const navigate = useNavigate();
 
@@ -22,30 +22,27 @@ const GenerarClave = () => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Nombre y apellido"
+        placeholder="DNI"
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
       />
       <TextInput
         style={styles.input}
-        placeholder="DNI"
+        placeholder="Contraseña"
         placeholderTextColor="darkgrey"
+        secureTextEntry={true}
         textAlign="center"
         selectionColor="transparent"
       />
-        <TextInput
-        style={styles.input}
-        placeholder="Dirección"
-        placeholderTextColor="darkgrey"
-        textAlign="center"
-        selectionColor="transparent"
-      />
-      <Pressable style={styles.button}>
-        <Text style={styles.buttonText}>Generar clave</Text>
-      </Pressable>
-      <Link to="/invitado">
+      <Link to="/vecino/1" component={Pressable} style={styles.button}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </Link>
+      <Link to="/buscarprom">
         <Text style={styles.linkText}>Entrar como invitado</Text>
+      </Link>
+      <Link to="/generarclave">
+        <Text style={styles.linkText}>Generar clave</Text>
       </Link>
     </View>
   );
@@ -81,7 +78,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 5,
     alignItems: 'center',
-    width: '50%',
+    width: '30%',
     marginBottom: 30,
   },
   buttonText: {
@@ -107,4 +104,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default GenerarClave;
+export default LoginVecino;

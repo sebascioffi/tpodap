@@ -1,6 +1,6 @@
 import React from 'react'
 import Constants from "expo-constants"
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, Image, StyleSheet, Dimensions, Pressable } from 'react-native'
 import { Link } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -12,13 +12,13 @@ const Inicio = () => {
         source={require('../imagenes/barrio.png')}
         style={styles.image}
       />
-      <Link to="/logininspector" component={TouchableOpacity} style={styles.button}>
+      <Link to="/logininspector" component={Pressable} style={styles.button}>
         <Text style={styles.buttonText}>Inspector</Text>
       </Link>
-      <Link to="/loginvecino" component={TouchableOpacity} style={styles.button}>
+      <Link to="/loginvecino" component={Pressable} style={styles.button}>
         <Text style={styles.buttonText}>Vecino</Text>
       </Link>
-      <Link to="/invitado" component={Pressable} style={styles.button}>
+      <Link to="/buscarprom" component={Pressable} style={styles.button}>
         <Text style={styles.buttonText}>Invitado</Text>
       </Link>
     </View>

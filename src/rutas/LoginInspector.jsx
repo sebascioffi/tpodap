@@ -35,10 +35,10 @@ const LoginInspector = () => {
         textAlign="center"
         selectionColor="transparent"
       />
-      <Pressable style={styles.button}>
+      <Link to="/inspector/1" component={Pressable} style={styles.button}>
         <Text style={styles.buttonText}>Entrar</Text>
-      </Pressable>
-      <Link to="/invitado">
+      </Link>
+      <Link to="/buscarprom">
         <Text style={styles.linkText}>Entrar como invitado</Text>
       </Link>
       <Link to="/loginvecino">

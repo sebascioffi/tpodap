@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
-const Invitado = () => {
+const Promociones = () => {
 
   const navigate = useNavigate();
 
@@ -72,4 +72,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Invitado;
+export default Promociones;
