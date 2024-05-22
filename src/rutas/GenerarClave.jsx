@@ -81,12 +81,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 5,
     alignItems: 'center',
-    width: '50%',
+    width: '30%',
     marginBottom: 30,
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
+    textAlign: "center"
   },
   linkText: {
       color: 'black',

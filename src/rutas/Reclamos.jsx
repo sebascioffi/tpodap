@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Dimensions, TextInput, ScrollView } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
-import comercios from "../ejemploPromociones.js"
+import reclamos from "../ejemploReclamos.js"
 
-const screenWidth = Dimensions.get('window').width;
-
-const Comercios = () => {
+const Reclamos = () => {
 
     const [searchText, setSearchText] = useState('');
 
     const navigate = useNavigate();
 
-    const filteredComercios = comercios.filter(com =>
-      com.tipo.toLowerCase() === 'comercio' && com.nombre.toLowerCase().includes(searchText.toLowerCase())
+    const filteredReclamos = reclamos.filter(rec =>
+      rec.id.toString().includes(searchText)
     );
     
     return (
@@ -37,24 +35,21 @@ const Comercios = () => {
               onChangeText={setSearchText}
             />
           </View>
+
           <ScrollView contentContainerStyle={styles.scrollContainer}>
-            {filteredComercios.map((com, index) => (
-            <Link key={index} to={`/promocion/${com.id}`} component={View} style={styles.comercioContainer}>
-                <>
-                <Image
-                  source={{ uri: com.urlImagenes[0] }}
-                  style={styles.image}
-                />
-                <View style={styles.infoContainer}>
-                  <Text style={styles.tipo}>{com.tipo}</Text>
-                  <Text style={styles.nombre}>{com.nombre}</Text>
-                  <Text style={styles.horario}>{com.horario}</Text>
-                  <Text style={styles.descuento}>{com.descuento}</Text>
-                </View>
-                </>
+      {filteredReclamos.map((rec, index) => (
+        <View key={index} style={styles.reclamoContainer}>
+          <Text style={styles.reclamoText}>Reclamo: {rec.id}</Text>
+          <Text style={styles.reclamoText}>Estado: {rec.estado}</Text>
+          <Pressable style={styles.button}>
+            <Link to={`/reclamo/${rec.id}`} component={Text} style={styles.buttonText}>
+                <Text style={styles.seguimiento}>Ver Seguimiento</Text>
             </Link>
-            ))}
-          </ScrollView>
+          </Pressable>
+        </View>
+      ))}
+    </ScrollView>
+
         </View>
       );
     };
@@ -92,39 +87,6 @@ const Comercios = () => {
       paddingLeft: 40, 
       outlineStyle: 'none',
     },
-    comercioContainer: {
-      marginBottom: 20,
-      position: 'relative',
-    },
-    image: {
-      width: 350,
-      height: 200,
-      borderRadius: 10,
-    },
-    infoContainer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: 'rgba(211, 211, 211, 0.8)',
-      padding: 10,
-      borderBottomLeftRadius: 10,
-      borderBottomRightRadius: 10,
-    },
-    tipo: {
-        fontSize: 19,
-        fontWeight: 'bold',
-      },
-      nombre: {
-        fontSize: 17,
-      },
-      horario: {
-        fontSize: 15,
-      },
-      descuento: {
-        fontSize: 15,
-        color: 'red',
-      },
       backArrow: {
         position: 'absolute',
         top: 20, // Ajusta según sea necesario para que esté bien alineado
@@ -134,6 +96,39 @@ const Comercios = () => {
         width: 24, // Ajusta el tamaño de la flecha según sea necesario
         height: 24,
       },
+      scrollContainer: {
+        padding: 10,
+      },
+      reclamoContainer: {
+        marginBottom: 20,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 10,
+        backgroundColor: '#f9f9f9',
+        width: 250,
+      },
+      reclamoText: {
+        marginBottom: 5,
+        fontSize: 16,
+      },
+      button: {
+        backgroundColor: 'gray',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+        alignItems: 'center',
+        marginTop: 10,
+      },
+      buttonText: {
+        color: 'white',
+        fontSize: 16,
+      },
+      seguimiento: {
+        fontSize: 16,
+        color: "#ffffff"
+      }
   });
   
-  export default Comercios;
+  export default Reclamos;
+

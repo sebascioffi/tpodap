@@ -1,14 +1,22 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
-import { useParams } from 'react-router-dom';
+import { View, Text, Image, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useNavigate, useParams } from 'react-router-dom';
 import comercios from '../ejemploPromociones.js'; // Asegúrate de tener el array de comercios en este archivo
 
 const Promocion = () => {
   const { id } = useParams();
   const comercio = comercios.find(com => com.id === parseInt(id));
 
+  const navigate = useNavigate();
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+        <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
+        <Image
+          source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
+          style={styles.arrowImage}
+        />
+        </Pressable>
       <Image
         source={{ uri: comercio.urlImagenes[0] }}
         style={styles.mainImage}
@@ -69,7 +77,15 @@ const styles = StyleSheet.create({
   desc: {
     fontSize: 16,
     marginBottom: 5,
-  }
+  },
+  backArrow: {
+    top: -10, // Ajusta según sea necesario para que esté bien alineado
+    left: 5,
+  },
+  arrowImage: {
+    width: 24, // Ajusta el tamaño de la flecha según sea necesario
+    height: 24,
+  },
 });
 
 export default Promocion;

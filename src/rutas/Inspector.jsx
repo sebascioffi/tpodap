@@ -48,7 +48,7 @@ const Inspector = () => {
                 style={styles.iconImage}
               />
             </Pressable>
-            <Text style={styles.modalText}>{inspector.usuario}</Text>
+            <Text style={styles.modalText}>Nombre de Usuario</Text>
             <View style={styles.textContainer}>
               <Pressable onPress={() => setMenuVisible(false)} style={styles.pressableContainer}>
                 <>

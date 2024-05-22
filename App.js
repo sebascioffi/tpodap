@@ -10,6 +10,8 @@ import Promociones from './src/rutas/Promociones.jsx';
 import Inspector from './src/rutas/Inspector.jsx';
 import Vecino from './src/rutas/Vecino.jsx';
 import GenerarReclamo from './src/rutas/GenerarReclamo.jsx';
+import Reclamos from './src/rutas/Reclamos.jsx';
+import Reclamo from './src/rutas/Reclamo.jsx';
 
 export default function App() {
   return <>
@@ -24,8 +26,10 @@ export default function App() {
       <Route path="/servicios" element={<Servicios />} />
       <Route path="/promocion/:id" element={<Promocion />} />
       <Route path="/inspector/:id" element={<Inspector />} />
+      <Route path="/reclamo/:id" element={<Reclamo />} />
       <Route path="/vecino/:id" element={<Vecino />} />
       <Route path="/genreclamo" element={<GenerarReclamo />} />
+      <Route path="/reclamos" element={<Reclamos />} />
     </Routes>
   </NativeRouter>
   </> 

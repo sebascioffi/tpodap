@@ -3,18 +3,24 @@ import { View, Text, StyleSheet, Pressable, Image, Dimensions, TextInput, Scroll
 import { Link, useNavigate } from 'react-router-native';
 import servicios from "../ejemploPromociones.js"
 
-const screenWidth = Dimensions.get('window').width;
-
 const Servicios = () => {
 
     const [searchText, setSearchText] = useState('');
 
-    const filteredServicios = servicios.filter(com =>
-      com.tipo.toLowerCase() === 'servicio' && com.nombre.toLowerCase().includes(searchText.toLowerCase())
+    const navigate = useNavigate();
+
+    const filteredServicios = servicios.filter(ser =>
+      ser.tipo.toLowerCase() === 'servicio' && ser.nombre.toLowerCase().includes(searchText.toLowerCase())
     );
     
     return (
         <View style={styles.container}>
+        <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
+        <Image
+          source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
+          style={styles.arrowImage}
+        />
+        </Pressable>
           <View style={styles.inputContainer}>
             <Image
               source={require('../imagenes/lupa.png')} // Asegúrate de tener esta imagen en tu carpeta de imágenes
@@ -117,7 +123,15 @@ const Servicios = () => {
         fontSize: 15,
         color: 'red',
       },
-
+      backArrow: {
+        position: 'absolute',
+        top: 20, // Ajusta según sea necesario para que esté bien alineado
+        left: 20,
+      },
+      arrowImage: {
+        width: 24, // Ajusta el tamaño de la flecha según sea necesario
+        height: 24,
+      },
   });
   
   export default Servicios;

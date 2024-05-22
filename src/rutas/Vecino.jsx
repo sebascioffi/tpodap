@@ -48,7 +48,7 @@ const Vecino = () => {
                 style={styles.iconImage}
               />
             </Pressable>
-            <Text style={styles.modalText}>{vecino.usuario}</Text>
+            <Text style={styles.modalText}>Nombre de Usuario</Text>
             <View style={styles.textContainer}>
               <Pressable onPress={() => setMenuVisible(false)} style={styles.pressableContainer}>
                 <>
