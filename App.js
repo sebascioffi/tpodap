@@ -12,6 +12,9 @@ import Vecino from './src/rutas/Vecino.jsx';
 import GenerarReclamo from './src/rutas/GenerarReclamo.jsx';
 import Reclamos from './src/rutas/Reclamos.jsx';
 import Reclamo from './src/rutas/Reclamo.jsx';
+import GenerarDenuncia from './src/rutas/GenerarDenuncia.jsx';
+import Denuncias from './src/rutas/Denuncias.jsx';
+import Denuncia from './src/rutas/Denuncia.jsx';
 
 export default function App() {
   return <>
@@ -30,6 +33,9 @@ export default function App() {
       <Route path="/vecino/:id" element={<Vecino />} />
       <Route path="/genreclamo" element={<GenerarReclamo />} />
       <Route path="/reclamos" element={<Reclamos />} />
+      <Route path="/gendenuncia" element={<GenerarDenuncia />} />
+      <Route path="/denuncias" element={<Denuncias />} />
+      <Route path="/denuncia/:id" element={<Denuncia />} />
     </Routes>
   </NativeRouter>
   </> 

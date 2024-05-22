@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
     },
     backArrow: {
       position: 'absolute',
-      top: 20, // Ajusta según sea necesario para que esté bien alineado
-      left: 20,
+      top: 10, // Ajusta según sea necesario para que esté bien alineado
+      left: 10,
     },
     arrowImage: {
       width: 24, // Ajusta el tamaño de la flecha según sea necesario
