@@ -1,6 +1,7 @@
 export default [
     {   
         id: 1,
-        usuario: "Juan Perez"
+        usuario: "Juan Perez",
+        dni: 40385282
     },
 ]

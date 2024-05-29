@@ -70,7 +70,7 @@ const Vecino = () => {
                  </>
               </Link>
 
-              <Link to={`/agregarprom`} component={Pressable} style={styles.pressableContainer}>
+              <Link to={`/genpromocion`} component={Pressable} style={styles.pressableContainer}>
                 <>
                 <Image
                  source={require("../imagenes/agregarservicio.png")}

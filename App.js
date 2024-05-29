@@ -15,27 +15,42 @@ import Reclamo from './src/rutas/Reclamo.jsx';
 import GenerarDenuncia from './src/rutas/GenerarDenuncia.jsx';
 import Denuncias from './src/rutas/Denuncias.jsx';
 import Denuncia from './src/rutas/Denuncia.jsx';
+import GenerarPromocion from './src/rutas/GenerarPromocion.jsx';
+import GenerarComercio from './src/rutas/GenerarComercio.jsx';
+import GenerarServicio from './src/rutas/GenerarServicio.jsx';
+import Perfil from './src/rutas/Perfil.jsx';
 
 export default function App() {
   return <>
   <NativeRouter>
     <Routes>
       <Route exact path='/' element={<Inicio />} />
+
       <Route path="/logininspector" element={<LoginInspector />} />
       <Route path="/loginvecino" element={<LoginVecino />} />
+
+      <Route path="/inspector/:id" element={<Inspector />} />
+      <Route path="/vecino/:id" element={<Vecino />} />
+
       <Route path="/buscarprom" element={<Promociones />} />
-      <Route path="/generarclave" element={<GenerarClave />} />
       <Route path="/comercios" element={<Comercios />} />
       <Route path="/servicios" element={<Servicios />} />
-      <Route path="/promocion/:id" element={<Promocion />} />
-      <Route path="/inspector/:id" element={<Inspector />} />
-      <Route path="/reclamo/:id" element={<Reclamo />} />
-      <Route path="/vecino/:id" element={<Vecino />} />
-      <Route path="/genreclamo" element={<GenerarReclamo />} />
       <Route path="/reclamos" element={<Reclamos />} />
-      <Route path="/gendenuncia" element={<GenerarDenuncia />} />
       <Route path="/denuncias" element={<Denuncias />} />
+
+      <Route path="/promocion/:id" element={<Promocion />} />
+      <Route path="/reclamo/:id" element={<Reclamo />} />
       <Route path="/denuncia/:id" element={<Denuncia />} />
+
+      <Route path="/generarclave" element={<GenerarClave />} />
+      <Route path="/gendenuncia" element={<GenerarDenuncia />} />
+      <Route path="/genreclamo" element={<GenerarReclamo />} />
+      <Route path="/genpromocion" element={<GenerarPromocion />} />
+      <Route path="/gencomercio" element={<GenerarComercio />} />
+      <Route path="/genservicio" element={<GenerarServicio />} />
+
+      <Route path="/perfil/:id" element={<Perfil />} />
+
     </Routes>
   </NativeRouter>
   </> 
