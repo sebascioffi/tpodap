@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Dimensions, TextInput, ScrollView } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
-import comercios from "../ejemploPromociones.js"
-
-const screenWidth = Dimensions.get('window').width;
 
 const Comercios = () => {
 
     const [searchText, setSearchText] = useState('');
+    const [comercios, setComercios] = useState([]);
 
     const navigate = useNavigate();
 
+      useEffect(() => {
+    const fetchComercios = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/promociones');
+        const data = await response.json();
+        setComercios(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchComercios();
+  }, []);
+
+  
     const filteredComercios = comercios.filter(com =>
-      com.tipo.toLowerCase() === 'comercio' && com.nombre.toLowerCase().includes(searchText.toLowerCase())
+      com.categoria.toLowerCase() === "comercio" && com.nombre.toLowerCase().includes(searchText.toLowerCase())
     );
     
     return (
@@ -39,16 +52,16 @@ const Comercios = () => {
           </View>
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             {filteredComercios.map((com, index) => (
-            <Link key={index} to={`/promocion/${com.id}`} component={View} style={styles.comercioContainer}>
+            <Link key={index} to={`/promocion/${com._id}`} component={View} style={styles.comercioContainer}>
                 <>
                 <Image
-                  source={{ uri: com.urlImagenes[0] }}
+                  source={{ uri: com.fotosPublicacion[0] }}
                   style={styles.image}
                 />
                 <View style={styles.infoContainer}>
-                  <Text style={styles.tipo}>{com.tipo}</Text>
+                  <Text style={styles.tipo}>{com.categoria}</Text>
                   <Text style={styles.nombre}>{com.nombre}</Text>
-                  <Text style={styles.horario}>{com.horario}</Text>
+                  <Text style={styles.horario}>{com.contacto.horarioComercio}</Text>
                   <Text style={styles.descuento}>{com.descuento}</Text>
                 </View>
                 </>

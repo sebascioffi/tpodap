@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useNavigate, useParams } from 'react-router-dom';
-import comercios from '../ejemploPromociones.js'; // Asegúrate de tener el array de comercios en este archivo
 
 const Promocion = () => {
   const { id } = useParams();
-  const comercio = comercios.find(com => com.id === parseInt(id));
+  const [comercio, setComercio] = useState({});
+
+  useEffect(() => {
+    const fetchComercio = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/promociones/${id}`);
+        const data = await response.json();
+        setComercio(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchComercio();
+  }, [id]);
 
   const navigate = useNavigate();
 
@@ -17,28 +30,36 @@ const Promocion = () => {
           style={styles.arrowImage}
         />
         </Pressable>
+
+        {comercio.fotosPublicacion && comercio.fotosPublicacion.length > 0 && (
+        <>
       <Image
-        source={{ uri: comercio.urlImagenes[0] }}
+        source={{ uri: comercio.fotosPublicacion[0].uri }}
         style={styles.mainImage}
       />
+        </>
+      )}
+
       <View style={styles.infoContainer}>
-        <Text style={styles.tipo}>{comercio.tipo}</Text>
+        <Text style={styles.tipo}>{comercio.categoria}</Text>
         <Text style={styles.desc}>{comercio.nombre}</Text>
-        <Text style={styles.desc}>Horario: {comercio.horario}</Text>
+        <Text style={styles.desc}>Horario: {comercio.contacto ? comercio.contacto.horarioComercio : 'Horario no disponible'}</Text>
         <Text style={styles.desc}>Descuento/Promocion: {comercio.descuento}</Text>
         <Text style={styles.desc}>Teléfono: {comercio.telefono}</Text>
-        <Text style={styles.desc}>Encargado: {comercio.encargado}</Text>
-        <Text style={styles.desc}>Descripción: {comercio.descripcion}</Text>
-        <Text style={styles.desc}>Dirección: {comercio.direccion}</Text>
+        <Text style={styles.desc}>Descripción: {comercio.detalles}</Text>
       </View>
-      {comercio.urlImagenes.length > 1 && (
+
+
+      
+      {comercio.fotosPublicacion && comercio.fotosPublicacion.length > 1 && (
         <>
       <Text style={styles.desc}>Más imagenes:</Text>
+      
       <ScrollView>
-        {comercio.urlImagenes.slice(1).map((url, index) => (
+        {comercio.fotosPublicacion && comercio.fotosPublicacion.slice(1).map((uri, index) => (
           <Image
             key={index}
-            source={{ uri: url }}
+            source={{ uri: uri }}
             style={styles.image}
           />
         ))}

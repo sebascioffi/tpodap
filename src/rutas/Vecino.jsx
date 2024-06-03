@@ -110,7 +110,7 @@ const Vecino = () => {
                  </>
               </Link>
 
-              <Link to={`/gendenuncia`} component={Pressable} style={styles.pressableContainer}>
+              <Link to={`/declaracion`} component={Pressable} style={styles.pressableContainer}>
                 <>
                 <Image
                  source={require("../imagenes/gendenuncia.png")}

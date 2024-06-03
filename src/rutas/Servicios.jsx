@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Dimensions, TextInput, ScrollView } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
-import servicios from "../ejemploPromociones.js"
 
 const Servicios = () => {
 
     const [searchText, setSearchText] = useState('');
+    const [servicios, setServicios] = useState([]);
 
     const navigate = useNavigate();
 
-    const filteredServicios = servicios.filter(ser =>
-      ser.tipo.toLowerCase() === 'servicio' && ser.nombre.toLowerCase().includes(searchText.toLowerCase())
-    );
+    useEffect(() => {
+      const fetchServicios = async () => {
+        try {
+          const response = await fetch('http://localhost:8080/api/promociones');
+          const data = await response.json();
+          console.log(data);
+          setServicios(data);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+  
+      fetchServicios();
+    }, []);
+  
+    
+      const filteredServicios = servicios.filter(ser =>
+        ser.categoria.toLowerCase() == "servicio" && ser.nombre.toLowerCase().includes(searchText.toLowerCase())
+      );
     
     return (
         <View style={styles.container}>
@@ -37,16 +53,16 @@ const Servicios = () => {
           </View>
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             {filteredServicios.map((ser, index) => (
-            <Link key={index} to={`/promocion/${ser.id}`} component={View} style={styles.comercioContainer}>
+            <Link key={index} to={`/promocion/${ser._id}`} component={View} style={styles.comercioContainer}>
                 <>
                 <Image
-                  source={{ uri: ser.urlImagenes[0] }}
+                  source={{ uri: ser.fotosPublicacion[0] }}
                   style={styles.image}
                 />
                 <View style={styles.infoContainer}>
-                  <Text style={styles.tipo}>{ser.tipo}</Text>
+                  <Text style={styles.tipo}>{ser.categoria}</Text>
                   <Text style={styles.nombre}>{ser.nombre}</Text>
-                  <Text style={styles.horario}>{ser.horario}</Text>
+                  <Text style={styles.horario}>{ser.contacto.horarioComercio}</Text>
                   <Text style={styles.descuento}>{ser.descuento}</Text>
                 </View>
                 </>

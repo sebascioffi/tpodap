@@ -1,12 +1,46 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable, Modal } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
 const GenerarClave = () => {
-
   const navigate = useNavigate();
+
+  const [modalExitoVisible, setModalExitoVisible] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    dni: '',
+    direccion: ''
+  });
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+};
+
+const handleSubmit = async (event) => {
+    event.preventDefault();
+    console.log(formData);
+    try {
+      const response = await fetch('http://localhost:8080/api/usuario', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+      });
+          const responseData = await response.json(); // Parsea los datos de la respuesta
+          console.log(responseData);
+  } catch (error) {
+      console.error("Error:", error);
+  }
+};
+
 
   return (
     <View style={styles.container}>
@@ -26,6 +60,9 @@ const GenerarClave = () => {
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
+        name="name"
+        value={formData.name}
+        onChangeText={(text) => handleInputChange({ target: { name: 'name', value: text } })}
       />
       <TextInput
         style={styles.input}
@@ -33,20 +70,42 @@ const GenerarClave = () => {
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
+        name="dni"
+        value={formData.dni}
+        onChangeText={(text) => handleInputChange({ target: { name: 'dni', value: text } })}
       />
-        <TextInput
+      <TextInput
         style={styles.input}
         placeholder="Dirección"
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
-      />
-      <Pressable style={styles.button}>
+        name="direccion"
+        value={formData.direccion}
+        onChangeText={(text) => handleInputChange({ target: { name: 'direccion', value: text } })}
+        />
+      <Pressable style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Generar clave</Text>
       </Pressable>
       <Link to="/buscarprom">
         <Text style={styles.linkText}>Entrar como invitado</Text>
       </Link>
+
+      <Modal
+        visible={modalExitoVisible}
+        transparent={false}
+      >
+        <View style={styles.modalExitoContainer}>
+        <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
+        <Image
+          source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
+          style={styles.arrowImage}
+        />
+        </Pressable>
+          <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
+          <Text style={styles.boldText}>Su clave ha sido solicitada correctamente</Text>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -105,6 +164,18 @@ const styles = StyleSheet.create({
     arrowImage: {
       width: 24, // Ajusta el tamaño de la flecha según sea necesario
       height: 24,
+    },
+    boldText: {
+      fontSize: 23,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+    modalExitoContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
     },
 });
 

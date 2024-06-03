@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, Image, Modal } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, Image, Modal, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useNavigate } from 'react-router-native';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 
 const GenerarComercio = () => {
   const [nombre, setNombre] = useState('');
-  const [medioContacto, setMedioContacto] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [horario, setHorario] = useState('');
   const [encargado, setEncargado] = useState('');
-  const [rubro, setRubro] = useState('');
-  const [detalles, setDetalles] = useState([]);
+  const [descuento, setDescuento] = useState('');
+  const [detalles, setDetalles] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -27,25 +30,46 @@ const GenerarComercio = () => {
     setModalVisible(false);
   };
 
+
   const handleArchivo = async () => {
     try {
-      let result = await DocumentPicker.getDocumentAsync({});
-      if (result.type != "cancel") {
-        console.log(result.assets[0]);
-        setArchivos(prevArchivos => [...prevArchivos, result.assets[0]]);
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false, // Si necesitas la imagen en base64 por alguna razón
+        quality: 1,
+      });
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        const fileName = asset.uri.split('/').pop();
+        const match = /\.(\w+)$/.exec(fileName);
+        const type = match ? `image/${match[1]}` : `image`;
+
+        setArchivos(prevArchivos => [...prevArchivos, { uri: asset.uri, name: asset.fileName, type }]);
       }
     } catch (err) {
       console.error("Error al seleccionar archivos:", err);
     }
   };
 
-
-  const handleSubmit = () => {
-    if (nombre == "" || medioContacto == "" || encargado == "" || rubro == "" || detalles == ""){
+  const handleSubmit = async (event) => {
+    if (nombre == "" || telefono == "" || horario == "" || encargado == "" || descuento == "" || detalles == ""){
       setModalErrorVisible(true)
     } else{
-      console.log({ nombre, medioContacto, encargado, rubro, detalles, archivos });
-      setModalExitoVisible(true)
+      event.preventDefault()
+      try {
+        const response = await fetch('http://localhost:8080/api/promociones', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({categoria:"comercio", nombre, telefono,contacto:{nombreapellido: encargado, horarioComercio: horario}, descuento, detalles, fotosPublicacion: archivos })
+        });
+        const responseData = await response.json();
+        console.log(responseData);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+
     }
   };
 
@@ -68,12 +92,20 @@ const GenerarComercio = () => {
         onChangeText={setNombre}
       />
 
-      <Text style={styles.label}>Medio de contacto: *</Text>
+      <Text style={styles.label}>Teléfono: *</Text>
       <TextInput
         style={styles.input}
         placeholderTextColor="darkgrey"
-        value={medioContacto}
-        onChangeText={setMedioContacto}
+        value={telefono}
+        onChangeText={setTelefono}
+      />
+
+<Text style={styles.label}>Horario: *</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="darkgrey"
+        value={horario}
+        onChangeText={setHorario}
       />
 
       <Text style={styles.label}>Encargado/dueño: *</Text>
@@ -84,12 +116,12 @@ const GenerarComercio = () => {
         onChangeText={setEncargado}
       />
 
-    <Text style={styles.label}>Rubro: *</Text>
+    <Text style={styles.label}>Descuento: *</Text>
       <TextInput
         style={styles.input}
         placeholderTextColor="darkgrey"
-        value={rubro}
-        onChangeText={setRubro}
+        value={descuento}
+        onChangeText={setDescuento}
       />
 
       <Text style={styles.label}>Detalles: *</Text>
@@ -101,7 +133,7 @@ const GenerarComercio = () => {
         multiline={true}
       />
 
-      <Text style={styles.label}>Adjuntar Pruebas:</Text>
+      <Text style={styles.label}>Adjuntar fotos:</Text>
       <Pressable style={styles.input} onPress={handleArchivo}>
         <Text style={styles.uploadButtonText}>Seleccionar Archivo</Text>
       </Pressable>

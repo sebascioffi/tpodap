@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-native';
 
 const GenerarServicio = () => {
   const [nombre, setNombre] = useState('');
-  const [medioContacto, setMedioContacto] = useState('');
+  const [nombreServicio, setNombreServicio] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [horario, setHorario] = useState('');
   const [rubro, setRubro] = useState('');
-  const [promociones, setPromociones] = useState('');
-  const [detalles, setDetalles] = useState([]);
+  const [descuento, setDescuento] = useState('');
+  const [detalles, setDetalles] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -29,10 +31,18 @@ const GenerarServicio = () => {
 
   const handleArchivo = async () => {
     try {
-      let result = await DocumentPicker.getDocumentAsync({});
-      if (result.type != "cancel") {
-        console.log(result.assets[0]);
-        setArchivos(prevArchivos => [...prevArchivos, result.assets[0]]);
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false, // Si necesitas la imagen en base64 por alguna razón
+        quality: 1,
+      });
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        const fileName = asset.uri.split('/').pop();
+        const match = /\.(\w+)$/.exec(fileName);
+        const type = match ? `image/${match[1]}` : `image`;
+
+        setArchivos(prevArchivos => [...prevArchivos, { uri: asset.uri, name: asset.fileName, type }]);
       }
     } catch (err) {
       console.error("Error al seleccionar archivos:", err);
@@ -40,15 +50,26 @@ const GenerarServicio = () => {
   };
 
 
-  const handleSubmit = () => {
-    if (nombre == "" || medioContacto == "" || promociones == "" || rubro == "" || detalles == ""){
+  const handleSubmit = async(event) => {
+    if (nombre == "" || nombreServicio == "" || telefono == "" || horario == "" || descuento == "" || rubro == "" || detalles == ""){
       setModalErrorVisible(true)
     } else{
-      console.log({ nombre, medioContacto, rubro, promociones, detalles, archivos });
-      setModalExitoVisible(true)
+      event.preventDefault()
+      try {
+        const response = await fetch('http://localhost:8080/api/promociones', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({categoria:"servicio", contacto:{nombreapellido:nombre, horarioComercio:horario}, nombre:nombreServicio, telefono,descuento, rubro, detalles, fotosPublicacion: archivos })
+        });
+        const responseData = await response.json();
+        console.log(responseData);
+    } catch (error) {
+        console.error("Error:", error);
+    }
     }
   };
-
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -60,7 +81,7 @@ const GenerarServicio = () => {
       </Pressable>
       <Text style={styles.boldText}>Solicitud para Servicio</Text>
 
-      <Text style={styles.label}>Nombre: *</Text>
+      <Text style={styles.label}>Nombre y apellido: *</Text>
       <TextInput
         style={styles.input}
         placeholderTextColor="darkgrey"
@@ -68,12 +89,28 @@ const GenerarServicio = () => {
         onChangeText={setNombre}
       />
 
-      <Text style={styles.label}>Medio de contacto: *</Text>
+<Text style={styles.label}>Nombre del servicio: *</Text>
       <TextInput
         style={styles.input}
         placeholderTextColor="darkgrey"
-        value={medioContacto}
-        onChangeText={setMedioContacto}
+        value={nombreServicio}
+        onChangeText={setNombreServicio}
+      />
+
+      <Text style={styles.label}>Teléfono: *</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="darkgrey"
+        value={telefono}
+        onChangeText={setTelefono}
+      />
+
+<Text style={styles.label}>Horario: *</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="darkgrey"
+        value={horario}
+        onChangeText={setHorario}
       />
 
 
@@ -85,12 +122,12 @@ const GenerarServicio = () => {
         onChangeText={setRubro}
       />
 
-    <Text style={styles.label}>Promociones: *</Text>
+    <Text style={styles.label}>Descuento: *</Text>
       <TextInput
         style={styles.input}
         placeholderTextColor="darkgrey"
-        value={promociones}
-        onChangeText={setPromociones}
+        value={descuento}
+        onChangeText={setDescuento}
       />
 
       <Text style={styles.label}>Detalles: *</Text>
@@ -102,7 +139,7 @@ const GenerarServicio = () => {
         multiline={true}
       />
 
-      <Text style={styles.label}>Adjuntar Pruebas:</Text>
+      <Text style={styles.label}>Adjuntar fotos:</Text>
       <Pressable style={styles.input} onPress={handleArchivo}>
         <Text style={styles.uploadButtonText}>Seleccionar Archivo</Text>
       </Pressable>

@@ -19,6 +19,7 @@ import GenerarPromocion from './src/rutas/GenerarPromocion.jsx';
 import GenerarComercio from './src/rutas/GenerarComercio.jsx';
 import GenerarServicio from './src/rutas/GenerarServicio.jsx';
 import Perfil from './src/rutas/Perfil.jsx';
+import Declaracion from './src/rutas/Declaracion.jsx';
 
 export default function App() {
   return <>
@@ -31,6 +32,8 @@ export default function App() {
 
       <Route path="/inspector/:id" element={<Inspector />} />
       <Route path="/vecino/:id" element={<Vecino />} />
+
+      <Route path="/declaracion" element={<Declaracion />} />
 
       <Route path="/buscarprom" element={<Promociones />} />
       <Route path="/comercios" element={<Comercios />} />
