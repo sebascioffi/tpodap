@@ -3,6 +3,8 @@ import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, Image, Modal 
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useNavigate } from 'react-router-native';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadFile } from '../firebase/config';
 
 const GenerarServicio = () => {
   const [nombre, setNombre] = useState('');
@@ -34,42 +36,55 @@ const GenerarServicio = () => {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         base64: false, // Si necesitas la imagen en base64 por alguna razón
-        quality: 1,
+        quality: 0.4,
       });
       if (!result.canceled) {
         const asset = result.assets[0];
-        const fileName = asset.uri.split('/').pop();
-        const match = /\.(\w+)$/.exec(fileName);
-        const type = match ? `image/${match[1]}` : `image`;
-
-        setArchivos(prevArchivos => [...prevArchivos, { uri: asset.uri, name: asset.fileName, type }]);
+        setArchivos(prevArchivos => [...prevArchivos, asset]);
       }
     } catch (err) {
       console.error("Error al seleccionar archivos:", err);
     }
   };
-
-
-  const handleSubmit = async(event) => {
-    if (nombre == "" || nombreServicio == "" || telefono == "" || horario == "" || descuento == "" || rubro == "" || detalles == ""){
-      setModalErrorVisible(true)
-    } else{
-      event.preventDefault()
+  
+  const handleSubmit = async (event) => {
+    if (nombre === "" || nombreServicio === "" || telefono === "" || horario === "" || descuento === "" || rubro === "" || detalles === "") {
+      setModalErrorVisible(true);
+    } else {
+      event.preventDefault();
       try {
+        let fotos = [];
+        if (archivos.length > 0) {
+          fotos = await Promise.all(archivos.map(async (archivo) => {
+            const url = await uploadFile(archivo);
+            return { uri: url, name: archivo.fileName };
+          }));
+        }
         const response = await fetch('http://localhost:8080/api/promociones', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({categoria:"servicio", contacto:{nombreapellido:nombre, horarioComercio:horario}, nombre:nombreServicio, telefono,descuento, rubro, detalles, fotosPublicacion: archivos })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            categoria: "servicio",
+            contacto: { nombreapellido: nombre, horarioComercio: horario },
+            nombre: nombreServicio,
+            telefono,
+            descuento,
+            rubro,
+            detalles,
+            fotosPublicacion: fotos
+          })
         });
         const responseData = await response.json();
         console.log(responseData);
-    } catch (error) {
+        setModalExitoVisible(true);
+      } catch (error) {
         console.error("Error:", error);
+      }
     }
-    }
-  };
+  }; 
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

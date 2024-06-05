@@ -33,20 +33,20 @@ const Servicios = () => {
         <View style={styles.container}>
         <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
         <Image
-          source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
+          source={require('../imagenes/volver.png')} 
           style={styles.arrowImage}
         />
         </Pressable>
           <View style={styles.inputContainer}>
             <Image
-              source={require('../imagenes/lupa.png')} // Asegúrate de tener esta imagen en tu carpeta de imágenes
+              source={require('../imagenes/lupa.png')}
               style={styles.icon}
             />
             <TextInput
-              style={styles.input} // Agrega estilos específicos para la web
+              style={styles.input} 
               placeholder="Buscar..."
               placeholderTextColor="darkgrey"
-              selectionColor="transparent" // Esto elimina el borde amarillo al seleccionar el input
+              selectionColor="transparent" 
               value={searchText}
               onChangeText={setSearchText}
             />
@@ -55,13 +55,23 @@ const Servicios = () => {
             {filteredServicios.map((ser, index) => (
             <Link key={index} to={`/promocion/${ser._id}`} component={View} style={styles.comercioContainer}>
                 <>
-                <Image
-                  source={{ uri: ser.fotosPublicacion[0] }}
+                {ser.fotosPublicacion[0] ? (
+                  <>
+                  <Image
+                  source={{ uri: ser.fotosPublicacion[0].uri }}
                   style={styles.image}
                 />
+                  </>
+                ) : (
+                  <>
+                  <Image
+                  source={{ uri: ser.fotosPublicacion }}
+                  style={styles.image}
+                /></>
+                )}
                 <View style={styles.infoContainer}>
-                  <Text style={styles.tipo}>{ser.categoria}</Text>
-                  <Text style={styles.nombre}>{ser.nombre}</Text>
+                  <Text style={styles.tipo}>{ser.nombre}</Text>
+                  <Text style={styles.nombre}>{ser.rubro}</Text>
                   <Text style={styles.horario}>{ser.contacto.horarioComercio}</Text>
                   <Text style={styles.descuento}>{ser.descuento}</Text>
                 </View>

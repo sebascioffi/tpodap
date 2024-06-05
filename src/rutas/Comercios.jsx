@@ -54,13 +54,23 @@ const Comercios = () => {
             {filteredComercios.map((com, index) => (
             <Link key={index} to={`/promocion/${com._id}`} component={View} style={styles.comercioContainer}>
                 <>
-                <Image
-                  source={{ uri: com.fotosPublicacion[0] }}
+                {com.fotosPublicacion[0] ? (
+                  <>
+                  <Image
+                  source={{ uri: com.fotosPublicacion[0].uri }}
                   style={styles.image}
                 />
+                  </>
+                ) : (
+                  <>
+                  <Image
+                  source={{ uri: com.fotosPublicacion }}
+                  style={styles.image}
+                /></>
+                )}
                 <View style={styles.infoContainer}>
-                  <Text style={styles.tipo}>{com.categoria}</Text>
-                  <Text style={styles.nombre}>{com.nombre}</Text>
+                  <Text style={styles.tipo}>{com.nombre}</Text>
+                  <Text style={styles.nombre}>{com.categoria}</Text>
                   <Text style={styles.horario}>{com.contacto.horarioComercio}</Text>
                   <Text style={styles.descuento}>{com.descuento}</Text>
                 </View>

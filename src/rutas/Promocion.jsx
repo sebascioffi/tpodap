@@ -41,31 +41,47 @@ const Promocion = () => {
       )}
 
       <View style={styles.infoContainer}>
-        <Text style={styles.tipo}>{comercio.categoria}</Text>
-        <Text style={styles.desc}>{comercio.nombre}</Text>
-        <Text style={styles.desc}>Horario: {comercio.contacto ? comercio.contacto.horarioComercio : 'Horario no disponible'}</Text>
-        <Text style={styles.desc}>Descuento/Promocion: {comercio.descuento}</Text>
+      {comercio.categoria === "servicio" ? (
+        <>
+        <Text style={styles.tipo}>{comercio.nombre}</Text>
+        <Text style={styles.desc}>Categoría: Servicio</Text>
+        <Text style={styles.desc}>Ofrece el servicio: {comercio.contacto? comercio.contacto.nombreapellido: "No hay datos"}</Text>
         <Text style={styles.desc}>Teléfono: {comercio.telefono}</Text>
-        <Text style={styles.desc}>Descripción: {comercio.detalles}</Text>
+        <Text style={styles.desc}>Horario: {comercio.contacto ? comercio.contacto.horarioComercio : 'Horario no disponible'}</Text>
+        <Text style={styles.desc}>Rubro: {comercio.rubro}</Text>
+        <Text style={styles.desc}>Descuento: {comercio.descuento}</Text>
+        <Text style={styles.desc}>Detalles: {comercio.detalles}</Text>
+        </>
+      ): (
+        <>
+        <Text style={styles.tipo}>{comercio.nombre}</Text>
+        <Text style={styles.desc}>Categoría: Comercio</Text>
+        <Text style={styles.desc}>Teléfono: {comercio.telefono}</Text>
+        <Text style={styles.desc}>Horario: {comercio.contacto ? comercio.contacto.horarioComercio : 'Horario no disponible'}</Text>
+        <Text style={styles.desc}>Encargado/Dueño: {comercio.contacto? comercio.contacto.nombreapellido: "Sin dueño"}</Text>
+        <Text style={styles.desc}>Descuento: {comercio.descuento}</Text>
+        <Text style={styles.desc}>Detalles: {comercio.detalles}</Text>
+        </>
+      )}
       </View>
 
 
       
       {comercio.fotosPublicacion && comercio.fotosPublicacion.length > 1 && (
-        <>
-      <Text style={styles.desc}>Más imagenes:</Text>
-      
-      <ScrollView>
-        {comercio.fotosPublicacion && comercio.fotosPublicacion.slice(1).map((uri, index) => (
-          <Image
-            key={index}
-            source={{ uri: uri }}
-            style={styles.image}
-          />
-        ))}
-      </ScrollView>
-        </>
-      )}
+  <>
+    <Text style={styles.desc}>Más imagenes:</Text>
+    <ScrollView>
+      {comercio.fotosPublicacion.slice(1).map((foto, index) => (
+        <Image
+          key={index}
+          source={{ uri: foto.uri }}
+          style={styles.image}
+        />
+      ))}
+    </ScrollView>
+  </>
+)}
+
     </ScrollView>
   );
 };
