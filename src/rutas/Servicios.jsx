@@ -14,7 +14,6 @@ const Servicios = () => {
         try {
           const response = await fetch('http://localhost:8080/api/promociones');
           const data = await response.json();
-          console.log(data);
           setServicios(data);
         } catch (error) {
           console.error('Error fetching data:', error);

@@ -20,6 +20,7 @@ import GenerarComercio from './src/rutas/GenerarComercio.jsx';
 import GenerarServicio from './src/rutas/GenerarServicio.jsx';
 import Perfil from './src/rutas/Perfil.jsx';
 import Declaracion from './src/rutas/Declaracion.jsx';
+import PerfilInspector from './src/rutas/PerfilInspector.jsx';
 
 export default function App() {
   return <>
@@ -30,8 +31,8 @@ export default function App() {
       <Route path="/logininspector" element={<LoginInspector />} />
       <Route path="/loginvecino" element={<LoginVecino />} />
 
-      <Route path="/inspector/:id" element={<Inspector />} />
-      <Route path="/vecino/:id" element={<Vecino />} />
+      <Route path="/inspector/:legajo" element={<Inspector />} />
+      <Route path="/vecino/:dni" element={<Vecino />} />
 
       <Route path="/declaracion" element={<Declaracion />} />
 
@@ -52,7 +53,8 @@ export default function App() {
       <Route path="/gencomercio" element={<GenerarComercio />} />
       <Route path="/genservicio" element={<GenerarServicio />} />
 
-      <Route path="/perfil/:id" element={<Perfil />} />
+      <Route path="/perfil/:dni" element={<Perfil />} />
+      <Route path="/perfil/inspector/:legajo" element={<PerfilInspector />} />
 
     </Routes>
   </NativeRouter>

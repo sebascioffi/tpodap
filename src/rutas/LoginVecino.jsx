@@ -1,5 +1,7 @@
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable } from 'react-native';
+import { Modal } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -7,6 +9,54 @@ const screenWidth = Dimensions.get('window').width;
 const LoginVecino = () => {
 
   const navigate = useNavigate();
+
+  const [modalErrorVisible, setModalErrorVisible] = useState(false);
+  const [modalError2Visible, setModalError2Visible] = useState(false);
+  const [modalError3Visible, setModalError3Visible] = useState(false);
+
+  const [formData, setFormData] = useState({
+    dni: '',
+    password: ''
+  });
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+};
+
+const handleSubmit = async (event) => {
+  if (formData.dni == "" || formData.password == ""){
+    setModalError2Visible(true)
+  } else{
+    event.preventDefault();
+    try {
+      const response2 = await fetch('http://localhost:8080/api/usuario/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({dni:formData.dni, password:formData.password})
+        });
+            const responseData2 = await response2.json();
+            if (responseData2.status === 200){
+              await AsyncStorage.setItem('userDni', formData.dni);
+              navigate(`/vecino/${formData.dni}`);
+            }
+            if (responseData2.status === 401){
+              setModalErrorVisible(true)
+            }
+            if (responseData2.status === 404){
+              setModalError3Visible(true)
+            }
+  } catch (error) {
+      console.error("Error:", error);
+  }
+  }
+
+};
 
   return (
     <View style={styles.container}>
@@ -26,6 +76,9 @@ const LoginVecino = () => {
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
+        name="dni"
+        value={formData.dni}
+        onChangeText={(text) => handleInputChange({ target: { name: 'dni', value: text } })}
       />
       <TextInput
         style={styles.input}
@@ -34,16 +87,56 @@ const LoginVecino = () => {
         secureTextEntry={true}
         textAlign="center"
         selectionColor="transparent"
+        name="password"
+        value={formData.password}
+        onChangeText={(text) => handleInputChange({ target: { name: 'password', value: text } })}
       />
-      <Link to="/vecino/1" component={Pressable} style={styles.button}>
+      <Pressable style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Entrar</Text>
-      </Link>
+      </Pressable>
       <Link to="/buscarprom">
         <Text style={styles.linkText}>Entrar como invitado</Text>
       </Link>
       <Link to="/generarclave">
         <Text style={styles.linkText}>Generar clave</Text>
       </Link>
+
+      <Modal
+        visible={modalErrorVisible}
+        transparent={true}      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Contraseña incorrecta</Text>
+          </View>
+          <Pressable onPress={() => setModalErrorVisible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
+      <Modal
+        visible={modalError2Visible}
+        transparent={true}      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Debes completar todos los datos</Text>
+          </View>
+          <Pressable onPress={() => setModalError2Visible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
+      <Modal
+        visible={modalError3Visible}
+        transparent={true}      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Vecino no encontrado</Text>
+          </View>
+          <Pressable onPress={() => setModalError3Visible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -67,7 +160,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'black',
     marginBottom: 20,
-    color: 'darkgrey',
+    color: 'black',
     fontSize: 16,
     textAlign: 'center',
     outlineStyle: 'none',
@@ -101,6 +194,33 @@ const styles = StyleSheet.create({
     arrowImage: {
       width: 24, // Ajusta el tamaño de la flecha según sea necesario
       height: 24,
+    },
+    redModal: {
+      backgroundColor: '#EC5454', // Fondo rojo semi-transparente
+      width: '80%',
+      alignItems: 'center',
+      padding: 20,
+      borderRadius: 10,
+    },
+    modalErrorContainer: {
+      flex: 1,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      marginTop: 22,
+    },
+    modalErrorText: {
+      color: 'white',
+      fontSize: 16,
+    },
+    closeIcon: {
+      width: 24,
+      height: 24,
+    },
+    closeErrorButton: {
+      position: 'absolute',
+      top: 20,
+      right: 50,
+      zIndex: 1,
     },
 });
 

@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, Modal, Pressable } from 'react-native';
 import { Link, useParams } from 'react-router-native';
-import inspectores from '../ejemploInspectores.js'; // Asegúrate de tener el array de inspectores en este archivo
 
 const screenWidth = Dimensions.get('window').width;
 
 const Inspector = () => {
-  const { id } = useParams();
-  const inspector = inspectores.find(ins => ins.id === parseInt(id));
+  const { legajo } = useParams();
 
+  const [nombreInspector, setNombreInspector] = useState("");
   const [menuVisible, setMenuVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchInspector = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/personal/${legajo}`);
+        const data = await response.json();
+        setNombreInspector(`${data.nombre} ${data.apellido}`)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchInspector();
+  }, []);
+
 
   return (
     <View style={styles.container}>
@@ -25,10 +39,10 @@ const Inspector = () => {
           source={require('../imagenes/user.png')} // Asegúrate de tener una imagen de usuario en tu proyecto
           style={styles.userImage}
         />
-        <Text style={styles.desc}>Inspector {inspector.usuario}</Text>
+        <Text style={styles.desc}>Bienvenido Inspector!</Text>
       </View>
 
-      <Text style={styles.boldText}>Bienvenido Inspector!</Text>
+      <Text style={styles.boldText}>{nombreInspector}</Text>
 
       <Image
         source={require('../imagenes/barrio.png')}
@@ -48,7 +62,7 @@ const Inspector = () => {
                 style={styles.iconImage}
               />
             </Pressable>
-            <Text style={styles.modalText}>Nombre de Usuario</Text>
+            <Text style={styles.modalText}>{nombreInspector}</Text>
             <View style={styles.textContainer}>
               <Pressable onPress={() => setMenuVisible(false)} style={styles.pressableContainer}>
                 <>
@@ -90,7 +104,7 @@ const Inspector = () => {
                  </>
               </Link>
 
-              <Link to={`/perfil/${id}`} component={Pressable} style={styles.pressableContainer}>
+              <Link to={`/perfil/inspector/${legajo}`} component={Pressable} style={styles.pressableContainer}>
                 <>
                 <Image
                  source={require("../imagenes/user.png")}

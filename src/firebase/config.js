@@ -24,9 +24,8 @@ export async function uploadFile(file) {
       const response = await fetch(file.uri);
       const blob = await response.blob();
       await uploadBytes(storageRef, blob);
-      console.log('Uploaded a blob or file!');
+      console.log('Imagen subida');
       const url = await getDownloadURL(storageRef);
-      console.log(url);
       return url;
     } catch (error) {
       console.error('Upload failed:', error);

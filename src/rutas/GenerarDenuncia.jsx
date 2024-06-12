@@ -31,7 +31,6 @@ const GenerarDenuncia = () => {
     try {
       let result = await DocumentPicker.getDocumentAsync({});
       if (result.type != "cancel") {
-        console.log(result.assets[0]);
         setArchivos(prevArchivos => [...prevArchivos, result.assets[0]]);
       }
     } catch (err) {
@@ -44,7 +43,6 @@ const GenerarDenuncia = () => {
     if (tipo == "" || lugar == "" || nombre == "" || titulo == "" || detalle == ""){
       setModalErrorVisible(true)
     } else{
-      console.log({ tipo, lugar, nombre, titulo, detalle, archivos });
       setModalExitoVisible(true)
     }
   };

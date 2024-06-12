@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, Modal, Opacity, Pressable } from 'react-native';
 import { Link, useParams } from 'react-router-native';
-import vecinos from '../ejemploVecinos.js'; // Asegúrate de tener el array de inspectores en este archivo
 
 const screenWidth = Dimensions.get('window').width;
 
 const Vecino = () => {
-  const { id } = useParams();
-  const vecino = vecinos.find(ins => ins.id === parseInt(id));
+  const { dni } = useParams();
+
+  const [nombreVecino, setNombreVecino] = useState("");
+
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/usuario/buscarPorDni/${dni}`);
+        const data = await response.json();
+        setNombreVecino(data.nombre);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchUsuario();
+  }, []);
 
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -25,7 +39,7 @@ const Vecino = () => {
           source={require('../imagenes/user.png')} // Asegúrate de tener una imagen de usuario en tu proyecto
           style={styles.userImage}
         />
-        <Text style={styles.desc}>Vecino {vecino.usuario}</Text>
+        <Text style={styles.desc}>Vecino {nombreVecino}</Text>
       </View>
 
       <Text style={styles.boldText}>Bienvenido Vecino!</Text>
@@ -48,7 +62,7 @@ const Vecino = () => {
                 style={styles.iconImage}
               />
             </Pressable>
-            <Text style={styles.modalText}>Nombre de Usuario</Text>
+            <Text style={styles.modalText}>{nombreVecino}</Text>
             <View style={styles.textContainer}>
               <Pressable onPress={() => setMenuVisible(false)} style={styles.pressableContainer}>
                 <>
@@ -120,7 +134,7 @@ const Vecino = () => {
                  </>
               </Link>
 
-              <Link to={`/perfil/${id}`} component={Pressable} style={styles.pressableContainer}>
+              <Link to={`/perfil/${dni}`} component={Pressable} style={styles.pressableContainer}>
                 <>
                 <Image
                  source={require("../imagenes/user.png")}

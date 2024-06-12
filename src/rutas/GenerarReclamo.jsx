@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, Image, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useNavigate } from 'react-router-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { uploadFile } from '../firebase/config';
+import * as ImagePicker from 'expo-image-picker';
+
 
 const GenerarReclamo = () => {
   const [desperfecto, setDesperfecto] = useState('');
+  const [desperfectos, setDesperfectos] = useState([]);
+  const [sitios, setSitios] = useState([]);
   const [lugar, setLugar] = useState('');
   const [detalles, setDetalles] = useState('');
   const [archivos, setArchivos] = useState([]);
@@ -13,8 +19,51 @@ const GenerarReclamo = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalErrorVisible, setModalErrorVisible] = useState(false);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
+  const [numReclamo, setNumReclamo] = useState(0);
 
   const navigate = useNavigate();
+
+  const getDni = async () => {
+    try {
+      const dni = await AsyncStorage.getItem('userDni');
+      if (dni !== null) {
+        return dni;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error recuperando el DNI:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchDesperfectos = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/desperfectos');
+        const data = await response.json();
+        setDesperfectos(data);
+      } catch (error) {
+        console.error('Error fetching desperfectos:', error);
+      }
+    };
+
+    fetchDesperfectos();
+  }, []);
+
+  useEffect(() => {
+    const fetchSitios = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/sitios');
+        const data = await response.json();
+        setSitios(data);
+      } catch (error) {
+        console.error('Error fetching desperfectos:', error);
+      }
+    };
+
+    fetchSitios();
+  }, []);
 
   const handleImagePress = (archivo) => {
     setSelectedImage(archivo);
@@ -27,10 +76,14 @@ const GenerarReclamo = () => {
 
   const handleArchivo = async () => {
     try {
-      let result = await DocumentPicker.getDocumentAsync({});
-      if (result.type != "cancel") {
-        console.log(result.assets[0]);
-        setArchivos(prevArchivos => [...prevArchivos, result.assets[0]]);
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false, // Si necesitas la imagen en base64 por alguna razón
+        quality: 0.4,
+      });
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        setArchivos(prevArchivos => [...prevArchivos, asset]);
       }
     } catch (err) {
       console.error("Error al seleccionar archivos:", err);
@@ -38,16 +91,44 @@ const GenerarReclamo = () => {
   };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async(event) => {
     if (desperfecto == "" || lugar == "" || detalles == ""){
       setModalErrorVisible(true)
     } else{
-      console.log({ desperfecto, lugar, detalles, archivos });
-      setModalExitoVisible(true)
-    }
+      console.log("Cargando Reclamo");
+      let fotos = [];
+      if (archivos.length > 0) {
+        fotos = await Promise.all(archivos.map(async (archivo) => {
+          const url = await uploadFile(archivo);
+          return { uri: url, name: archivo.fileName };
+        }));
+      }
+      const dni = await getDni();
+      try {
+        const response = await fetch('http://localhost:8080/api/reclamos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({documento:dni,idSitio:lugar, idDesperfecto:desperfecto,descripcion:detalles,estado:"Pendiente"})
+        });
+            const responseData = await response.json();
+            setNumReclamo(responseData.id);
+            const response2 = await fetch('http://localhost:8080/api/reclamosmultimedia', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({idReclamo:responseData.id, fotos})
+          });
+          const responseData2 = await response2.json();
+            setModalExitoVisible(true);
+    }  catch (error) {
+    console.error("Error:", error);
+}
   };
 
-
+  }
   return (
     <View style={styles.container}>
         <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
@@ -60,26 +141,31 @@ const GenerarReclamo = () => {
       <Text style={styles.label}>Desperfecto: *</Text>
       <View style={styles.pickerContainer}>
         <Picker
-            selectedValue={desperfecto}
-            onValueChange={(itemValue) => setDesperfecto(itemValue)}
-            style={styles.picker}
+          selectedValue={desperfecto}
+          onValueChange={(itemValue) => setDesperfecto(itemValue)}
+          style={styles.picker}
         >
-        <Picker.Item label="Seleccionar..." value=""/>
-        <Picker.Item label="Bache" value="Bache"  />
-        <Picker.Item label="Reparación" value="Reparación" />
-        <Picker.Item label="Desuso" value="Desuso" />
-        <Picker.Item label="Vandalismo" value="Vandalismo"/>
+          <Picker.Item label="Seleccionar..." value="" />
+          {desperfectos.map((item) => (
+            <Picker.Item key={item.idDesperfecto} label={item.descripcion} value={item.idDesperfecto} />
+          ))}
         </Picker>
-    </View>
+      </View>
 
 
       <Text style={styles.label}>Lugar del Hecho: *</Text>
-      <TextInput
-        style={styles.input}
-        placeholderTextColor="darkgrey"
-        value={lugar}
-        onChangeText={setLugar}
-      />
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={lugar}
+          onValueChange={(itemValue) => setLugar(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Seleccionar..." value="" />
+          {sitios.map((item) => (
+            <Picker.Item key={item.idSitio} label={item.calle + " " + item.numero} value={item.idSitio} />
+          ))}
+        </Picker>
+      </View>
 
       <Text style={styles.label}>Detalles: *</Text>
       <TextInput
@@ -90,7 +176,7 @@ const GenerarReclamo = () => {
         multiline={true}
       />
 
-      <Text style={styles.label}>Adjuntar Pruebas:</Text>
+<Text style={styles.label}>Adjuntar pruebas:</Text>
       <Pressable style={styles.input} onPress={handleArchivo}>
         <Text style={styles.uploadButtonText}>Seleccionar Archivo</Text>
       </Pressable>
@@ -153,7 +239,7 @@ const GenerarReclamo = () => {
         </Pressable>
           <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
           <Text style={styles.labelExito}>El Reclamo se cargó correctamente</Text>
-          <Text style={styles.boldText}>Tu numero de reclamo es #837478</Text>
+          <Text style={styles.boldText}>Tu numero de reclamo es #{numReclamo}</Text>
         </View>
       </Modal>
 

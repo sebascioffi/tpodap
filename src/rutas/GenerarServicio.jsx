@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, Image, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useNavigate } from 'react-router-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadFile } from '../firebase/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GenerarServicio = () => {
   const [nombre, setNombre] = useState('');
@@ -31,6 +32,35 @@ const GenerarServicio = () => {
     setModalVisible(false);
   };
 
+  const getDni = async () => {
+    try {
+      const dni = await AsyncStorage.getItem('userDni');
+      if (dni !== null) {
+        return dni;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error recuperando el DNI:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchVecino = async () => {
+      try {
+        const dni = await getDni();
+        const response = await fetch(`http://localhost:8080/api/usuario/buscarPorDni/${dni}`);
+        const data = await response.json();
+        setNombre(`${data.nombre} ${data.apellido}`)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchVecino();
+  }, []);
+
   const handleArchivo = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -48,10 +78,11 @@ const GenerarServicio = () => {
   };
   
   const handleSubmit = async (event) => {
-    if (nombre === "" || nombreServicio === "" || telefono === "" || horario === "" || descuento === "" || rubro === "" || detalles === "") {
+    if (nombreServicio === "" || telefono === "" || horario === "" || descuento === "" || rubro === "" || detalles === "") {
       setModalErrorVisible(true);
     } else {
       event.preventDefault();
+      console.log("Cargando Servicio");
       try {
         let fotos = [];
         if (archivos.length > 0) {
@@ -77,7 +108,6 @@ const GenerarServicio = () => {
           })
         });
         const responseData = await response.json();
-        console.log(responseData);
         setModalExitoVisible(true);
       } catch (error) {
         console.error("Error:", error);
@@ -95,14 +125,6 @@ const GenerarServicio = () => {
         />
       </Pressable>
       <Text style={styles.boldText}>Solicitud para Servicio</Text>
-
-      <Text style={styles.label}>Nombre y apellido: *</Text>
-      <TextInput
-        style={styles.input}
-        placeholderTextColor="darkgrey"
-        value={nombre}
-        onChangeText={setNombre}
-      />
 
 <Text style={styles.label}>Nombre del servicio: *</Text>
       <TextInput

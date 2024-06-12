@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable, Modal } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -7,6 +8,50 @@ const screenWidth = Dimensions.get('window').width;
 const LoginInspector = () => {
 
   const navigate = useNavigate();
+
+  const [modalErrorVisible, setModalErrorVisible] = useState(false);
+
+  const handleCloseModal = () => {
+    setModalErrorVisible(false);
+  };
+
+
+  const [formData, setFormData] = useState({
+    legajo: '',
+    password: ''
+  });
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+};
+
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  try {
+    const response = await fetch('http://localhost:8080/api/personal/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({legajo:formData.legajo, password:formData.password})
+    });
+        const responseData = await response.json();
+        if (responseData.message === "Usuario no encontrado"){
+          setModalErrorVisible(true);
+        } else{
+          await AsyncStorage.setItem('legajoInspector', formData.legajo);
+          await AsyncStorage.setItem('userDni', "0");
+          navigate(`/inspector/${formData.legajo}`)
+        }
+} catch (error) {
+    console.error("Error:", error);
+}
+
+};
 
   return (
     <View style={styles.container}>
@@ -22,10 +67,13 @@ const LoginInspector = () => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Usuario"
+        placeholder="Legajo"
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
+        name="legajo"
+        value={formData.legajo}
+        onChangeText={(text) => handleInputChange({ target: { name: 'legajo', value: text } })}
       />
       <TextInput
         style={styles.input}
@@ -34,10 +82,13 @@ const LoginInspector = () => {
         secureTextEntry={true}
         textAlign="center"
         selectionColor="transparent"
+        name="password"
+        value={formData.password}
+        onChangeText={(text) => handleInputChange({ target: { name: 'password', value: text } })}
       />
-      <Link to="/inspector/1" component={Pressable} style={styles.button}>
+      <Pressable style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Entrar</Text>
-      </Link>
+      </Pressable>
       <Link to="/buscarprom">
         <Text style={styles.linkText}>Entrar como invitado</Text>
       </Link>
@@ -47,6 +98,21 @@ const LoginInspector = () => {
       <Link to="/generarclave">
         <Text style={styles.linkText}>Generar clave como vecino</Text>
       </Link>
+
+      <Modal
+        visible={modalErrorVisible}
+        transparent={true}
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Los datos son incorrectos</Text>
+          </View>
+          <Pressable onPress={() => setModalErrorVisible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -104,6 +170,33 @@ const styles = StyleSheet.create({
       arrowImage: {
         width: 24, // Ajusta el tamaño de la flecha según sea necesario
         height: 24,
+      },
+      redModal: {
+        backgroundColor: '#EC5454', // Fondo rojo semi-transparente
+        width: '80%',
+        alignItems: 'center',
+        padding: 20,
+        borderRadius: 10,
+      },
+      modalErrorContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginTop: 22,
+      },
+      modalErrorText: {
+        color: 'white',
+        fontSize: 16,
+      },
+      closeIcon: {
+        width: 24,
+        height: 24,
+      },
+      closeErrorButton: {
+        position: 'absolute',
+        top: 20,
+        right: 50,
+        zIndex: 1,
       },
   });
 

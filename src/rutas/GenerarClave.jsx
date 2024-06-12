@@ -8,11 +8,15 @@ const GenerarClave = () => {
   const navigate = useNavigate();
 
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
+  const [modalErrorVisible, setModalErrorVisible] = useState(false);
+  const [modalError2Visible, setModalError2Visible] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
+    apellido: '',
     dni: '',
-    direccion: ''
+    direccion: '',
+    password: '',
   });
 
   const handleInputChange = (event) => {
@@ -24,23 +28,45 @@ const GenerarClave = () => {
 };
 
 const handleSubmit = async (event) => {
-    event.preventDefault();
-    console.log(formData);
-    try {
-      const response = await fetch('http://localhost:8080/api/usuario', {
+    if (formData.name == "" || formData.dni == "" || formData.apellido == "" || formData.direccion == "" || formData.password == ""){
+      setModalErrorVisible(true);
+    } else {
+      event.preventDefault();
+      try {
+  
+        const response = await fetch('http://localhost:8080/api/usuario/solicitudClave', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({nombre: formData.name, dni:formData.dni, apellido:formData.apellido, direccion:formData.direccion})
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Something went wrong');
+        }
+        const responseData = await response.json();
+  
+        const response2 = await fetch('http://localhost:8080/api/usuario/generarClave', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({dni:formData.dni, password:formData.password})
       });
-          const responseData = await response.json(); // Parsea los datos de la respuesta
-          console.log(responseData);
-  } catch (error) {
-      console.error("Error:", error);
-  }
+            const responseData2 = await response2.json();
+            if (responseData.message == "Created!"){
+              setModalExitoVisible(true);
+            }
+    } catch (error) {
+      if (error.message === 'Error in solicitudClave Service') {
+        setModalError2Visible(true);
+      } else {
+        console.error(error);
+      }
+    }
+    }
 };
-
 
   return (
     <View style={styles.container}>
@@ -56,13 +82,23 @@ const handleSubmit = async (event) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Nombre y apellido"
+        placeholder="Nombre"
         placeholderTextColor="darkgrey"
         textAlign="center"
         selectionColor="transparent"
         name="name"
         value={formData.name}
         onChangeText={(text) => handleInputChange({ target: { name: 'name', value: text } })}
+      />
+            <TextInput
+        style={styles.input}
+        placeholder="Apellido"
+        placeholderTextColor="darkgrey"
+        textAlign="center"
+        selectionColor="transparent"
+        name="apellido"
+        value={formData.apellido}
+        onChangeText={(text) => handleInputChange({ target: { name: 'apellido', value: text } })}
       />
       <TextInput
         style={styles.input}
@@ -84,6 +120,18 @@ const handleSubmit = async (event) => {
         value={formData.direccion}
         onChangeText={(text) => handleInputChange({ target: { name: 'direccion', value: text } })}
         />
+
+        <TextInput
+        style={styles.input}
+        placeholder="Contraseña"
+        placeholderTextColor="darkgrey"
+        textAlign="center"
+        selectionColor="transparent"
+        name="password"
+        secureTextEntry={true}
+        value={formData.password}
+        onChangeText={(text) => handleInputChange({ target: { name: 'password', value: text } })}
+        />
       <Pressable style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Generar clave</Text>
       </Pressable>
@@ -103,7 +151,33 @@ const handleSubmit = async (event) => {
         />
         </Pressable>
           <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
-          <Text style={styles.boldText}>Su clave ha sido solicitada correctamente</Text>
+          <Text style={styles.boldText}>Su clave ha sido generada correctamente</Text>
+        </View>
+      </Modal>
+      <Modal
+        visible={modalErrorVisible}
+        transparent={true}
+      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Debes completar todos los datos</Text>
+          </View>
+          <Pressable onPress={() => setModalErrorVisible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
+      <Modal
+        visible={modalError2Visible}
+        transparent={true}
+      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Ya has generado tu clave</Text>
+          </View>
+          <Pressable onPress={() => setModalError2Visible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
         </View>
       </Modal>
     </View>
@@ -129,7 +203,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'black',
     marginBottom: 20,
-    color: 'darkgrey',
+    color: 'black',
     fontSize: 16,
     textAlign: 'center',
     outlineStyle: 'none',
@@ -176,6 +250,33 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'transparent',
+    },
+    modalErrorContainer: {
+      flex: 1,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      marginTop: 22,
+    },
+    redModal: {
+      backgroundColor: '#EC5454', // Fondo rojo semi-transparente
+      width: '80%',
+      alignItems: 'center',
+      padding: 20,
+      borderRadius: 10,
+    },
+    modalErrorText: {
+      color: 'white',
+      fontSize: 16,
+    },
+    closeErrorButton: {
+      position: 'absolute',
+      top: 20,
+      right: 50,
+      zIndex: 1,
+    },
+    closeIcon: {
+      width: 24,
+      height: 24,
     },
 });
 

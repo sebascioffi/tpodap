@@ -4,27 +4,28 @@ import { Link, useNavigate, useParams } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
-const Perfil = () => {
-  const { dni } = useParams();
+const PerfilInspector = () => {
+  const { legajo } = useParams();
 
-  const [nombreVecino, setNombreVecino] = useState("");
-  const [direccion, setDireccion] = useState("");
+  const [nombreInspector, setNombreInspector] = useState("");
+  const [sector, setSector] = useState("");
 
 
   useEffect(() => {
-    const fetchUsuario = async () => {
+    const fetchInspector = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/usuario/buscarPorDni/${dni}`);
+        const response = await fetch(`http://localhost:8080/api/personal/${legajo}`);
         const data = await response.json();
-        setNombreVecino(data.nombre);
-        setDireccion(data.direccion);
+        setNombreInspector(`${data.nombre} ${data.apellido}`)
+        setSector(data.sector)
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    fetchUsuario();
+    fetchInspector();
   }, []);
+
   const navigate = useNavigate();
 
   return (
@@ -41,12 +42,12 @@ const Perfil = () => {
           source={require('../imagenes/user.png')} // Asegúrate de tener una imagen de usuario en tu proyecto
           style={styles.userImage}
         />
-        <Text style={styles.desc}>{nombreVecino}</Text>
+        <Text style={styles.desc}>{nombreInspector}</Text>
       </View>
 
-      <Text style={styles.boldText}>Vecino registrado del barrio</Text>
-      <Text style={styles.boldText}>DNI: {dni}</Text>
-      <Text style={styles.boldText}>Dirección: {direccion}</Text>
+      <Text style={styles.boldText}>Inspector</Text>
+      <Text style={styles.boldText}>Legajo: {legajo}</Text>
+      <Text style={styles.boldText}>Sector: {sector}</Text>
 
       <Image
         source={require('../imagenes/barrio.png')}
@@ -111,4 +112,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Perfil;
+export default PerfilInspector;

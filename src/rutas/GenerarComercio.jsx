@@ -31,7 +31,6 @@ const GenerarComercio = () => {
     setModalVisible(false);
   };
 
-
   const handleArchivo = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -53,6 +52,7 @@ const GenerarComercio = () => {
       setModalErrorVisible(true)
     } else{
       event.preventDefault()
+      console.log("Cargando Comercio");
       try {
         let fotos = [];
         if (archivos.length > 0) {
@@ -69,7 +69,6 @@ const GenerarComercio = () => {
             body: JSON.stringify({categoria:"comercio", nombre, telefono,contacto:{nombreapellido: encargado, horarioComercio: horario}, descuento, detalles, fotosPublicacion: fotos })
         });
         const responseData = await response.json();
-        console.log(responseData);
         setModalExitoVisible(true);
     } catch (error) {
         console.error("Error:", error);
