@@ -2,40 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, Image, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { useNavigate } from 'react-router-native';
+import { useNavigate, useParams } from 'react-router-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uploadFile } from '../firebase/config';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-const GenerarDenuncia = () => {
-  const [tipo, setTipo] = useState('');
-  const [lugar, setLugar] = useState('');
+const GenerarReclamoInspector = () => {
+  const { legajo } = useParams();
+  const [rubroInspector, setRubroInspector] = useState('');
+  const [desperfecto, setDesperfecto] = useState('');
+  const [desperfectos, setDesperfectos] = useState([]);
   const [sitios, setSitios] = useState([]);
-  const [nombre, setNombre] = useState('');
-  const [detalle, setDetalle] = useState('');
+  const [lugar, setLugar] = useState('');
+  const [detalles, setDetalles] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalErrorVisible, setModalErrorVisible] = useState(false);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
-  const [numDenuncia, setNumDenuncia] = useState(0);
+  const [numReclamo, setNumReclamo] = useState(0);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchSitios = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/sitios');
-        const data = await response.json();
-        setSitios(data);
-      } catch (error) {
-        console.error('Error fetching desperfectos:', error);
-      }
-    };
-
-    fetchSitios();
-  }, []);
 
   const getDni = async () => {
     try {
@@ -50,6 +38,65 @@ const GenerarDenuncia = () => {
       return null;
     }
   };
+
+  useEffect(() => {
+    const fetchInspectorData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/personal/${legajo}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const inspector = await response.json();
+        setRubroInspector(inspector.sector);
+      } catch (error) {
+        console.error('Error al obtener los datos del inspector:', error);
+      }
+    };
+
+    fetchInspectorData();
+  }, [legajo]);
+
+  useEffect(() => {
+    const fetchDesperfectos = async () => {
+      try {
+        // Obtener todos los desperfectos
+        const desperfectosResponse = await fetch('http://localhost:8080/api/desperfectos');
+        const desperfectosData = await desperfectosResponse.json();
+  
+        // Obtener todos los rubros
+        const rubrosResponse = await fetch('http://localhost:8080/api/rubros');
+        const rubrosData = await rubrosResponse.json();
+  
+        // Filtrar desperfectos relacionados con el sectorInspector
+        const filteredDesperfectos = desperfectosData.filter(desperfecto => {
+          const rubro = rubrosData.find(r => r.idRubro === desperfecto.idRubro);
+          return rubro && rubro.descripcion === rubroInspector;
+        });
+  
+        setDesperfectos(filteredDesperfectos);
+      } catch (error) {
+        console.error('Error fetching desperfectos:', error);
+      }
+    };
+  
+    if (rubroInspector) {
+      fetchDesperfectos();
+    }
+  }, [rubroInspector]);
+  
+  useEffect(() => {
+    const fetchSitios = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/sitios');
+        const data = await response.json();
+        setSitios(data);
+      } catch (error) {
+        console.error('Error fetching desperfectos:', error);
+      }
+    };
+
+    fetchSitios();
+  }, []);
 
   const handleImagePress = (archivo) => {
     setSelectedImage(archivo);
@@ -77,14 +124,11 @@ const GenerarDenuncia = () => {
   };
 
 
-
   const handleSubmit = async(event) => {
-    if (tipo == "" || nombre == "" || lugar == "" || detalle == ""){
+    if (desperfecto == "" || lugar == "" || detalles == ""){
       setModalErrorVisible(true)
     } else{
-      console.log("Cargando Denuncia");
-      const nuevoDetalle = `Nombre del ${tipo} denunciado: ${nombre}`;
-      const detalleCompleto = `${detalle}. ${nuevoDetalle}`;
+      console.log("Cargando Reclamo");
       let fotos = [];
       if (archivos.length > 0) {
         fotos = await Promise.all(archivos.map(async (archivo) => {
@@ -94,22 +138,21 @@ const GenerarDenuncia = () => {
       }
       const dni = await getDni();
       try {
-        const response = await fetch('http://localhost:8080/api/denuncias', {
+        const response = await fetch('http://localhost:8080/api/reclamos', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({documento:dni,idSitio:lugar,descripcion:detalleCompleto,estado:"Pendiente",aceptaResponsabilidad:1})
+            body: JSON.stringify({documento:dni,idSitio:lugar, idDesperfecto:desperfecto,descripcion:detalles,estado:"Pendiente"})
         });
             const responseData = await response.json();
-            console.log(responseData);
-            setNumDenuncia(responseData.id);
-            const response2 = await fetch('http://localhost:8080/api/denunciasmultimedia', {
+            setNumReclamo(responseData.id);
+            const response2 = await fetch('http://localhost:8080/api/reclamosmultimedia', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
               },
-              body: JSON.stringify({idDenuncia:responseData.id, fotos})
+              body: JSON.stringify({idReclamo:responseData.id, fotos})
           });
           const responseData2 = await response2.json();
             setModalExitoVisible(true);
@@ -119,8 +162,6 @@ const GenerarDenuncia = () => {
   };
 
   }
-
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
         <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
@@ -129,45 +170,23 @@ const GenerarDenuncia = () => {
           style={styles.arrowImage}
         />
       </Pressable>
-      <Text style={styles.boldText}>Generación de Denuncia</Text>
-      <Text style={styles.label}>Comercio o Vecino: *</Text>
+      <Text style={styles.boldText}>Generación de Reclamo - Sector: {rubroInspector}</Text>
+      <Text style={styles.label}>Desperfecto: *</Text>
       <View style={styles.pickerContainer}>
         <Picker
-          selectedValue={tipo}
-          onValueChange={(itemValue) => setTipo(itemValue)}
+          selectedValue={desperfecto}
+          onValueChange={(itemValue) => setDesperfecto(itemValue)}
           style={styles.picker}
         >
           <Picker.Item label="Seleccionar..." value="" />
-          <Picker.Item label="Comercio" value="comercio" />
-          <Picker.Item label="Vecino" value="vecino" />
+          {desperfectos.map((item) => (
+            <Picker.Item key={item.idDesperfecto} label={item.descripcion} value={item.idDesperfecto} />
+          ))}
         </Picker>
       </View>
 
-      {tipo === 'comercio' && (
-        <>
-          <Text style={styles.label}>Nombre del comercio: *</Text>
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="black"
-            value={nombre}
-            onChangeText={setNombre}
-          />
-          </>
-      )}
 
-{tipo === 'vecino' && (
-  <>
-          <Text style={styles.label}>Nombre del vecino: *</Text>
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="black"
-            value={nombre}
-            onChangeText={setNombre}
-          />
-          </>
-      )}
-
-<Text style={styles.label}>Lugar del Hecho: *</Text>
+      <Text style={styles.label}>Lugar del Hecho: *</Text>
 <View style={styles.pickerContainer}>
   <Picker
     selectedValue={lugar}
@@ -185,16 +204,16 @@ const GenerarDenuncia = () => {
   </Picker>
 </View>
 
-      <Text style={styles.label}>Descripción: *</Text>
+      <Text style={styles.label}>Detalles: *</Text>
       <TextInput
         style={[styles.input, styles.detallesInput]}
-        placeholderTextColor="black"
-        value={detalle}
-        onChangeText={setDetalle}
+        placeholderTextColor="darkgrey"
+        value={detalles}
+        onChangeText={setDetalles}
         multiline={true}
       />
 
-      <Text style={styles.label}>Adjuntar Pruebas:</Text>
+<Text style={styles.label}>Adjuntar pruebas:</Text>
       <Pressable style={styles.input} onPress={handleArchivo}>
         <Text style={styles.uploadButtonText}>Seleccionar Archivo</Text>
       </Pressable>
@@ -249,15 +268,15 @@ const GenerarDenuncia = () => {
         transparent={false}
       >
         <View style={styles.modalExitoContainer}>
-        <Pressable onPress={() => navigate(-2)} style={styles.backArrow}>
+        <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
         <Image
           source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
           style={styles.arrowImage}
         />
         </Pressable>
           <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
-          <Text style={styles.labelExito}>La denuncia se cargó correctamente</Text>
-          <Text style={styles.boldText}>Tu numero de denuncia es #{numDenuncia}</Text>
+          <Text style={styles.labelExito}>El Reclamo se cargó correctamente</Text>
+          <Text style={styles.boldText}>Tu numero de reclamo es #{numReclamo}</Text>
         </View>
       </Modal>
 
@@ -278,14 +297,14 @@ const styles = StyleSheet.create({
       },
       label: {
         fontSize: 16,
-        marginVertical: 5,
+        marginVertical: 10,
         alignSelf: "start",
       },
       input: {
         borderWidth: 1,
         borderColor: '#AEAEAE',
         borderRadius: 5,
-        marginBottom: 10,
+        marginBottom: 20,
         padding: 10,
         width: "100%",
         fontSize: 16,
@@ -300,18 +319,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 5,
         width: 70,
-        marginTop: 10,
+        marginTop: 15,
       },
       submitButtonText: {
         color: 'white',
         fontSize: 16,
       },
       pickerContainer: {
-        marginBottom: 10,
+        marginBottom: 20,
         width: '100%', // Asegura que el contenedor tome el ancho completo
         outlineStyle: 'none',
-      },
-      picker: {
+      },     
+       picker: {
         borderWidth: 1,
         borderColor: '#AEAEAE',
         borderRadius: 5,
@@ -405,4 +424,4 @@ const styles = StyleSheet.create({
       }
 });
 
-export default GenerarDenuncia;
+export default GenerarReclamoInspector;

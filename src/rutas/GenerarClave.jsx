@@ -9,14 +9,11 @@ const GenerarClave = () => {
 
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
   const [modalErrorVisible, setModalErrorVisible] = useState(false);
-  const [modalError2Visible, setModalError2Visible] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
-    apellido: '',
     dni: '',
     direccion: '',
-    password: '',
   });
 
   const handleInputChange = (event) => {
@@ -28,43 +25,10 @@ const GenerarClave = () => {
 };
 
 const handleSubmit = async (event) => {
-    if (formData.name == "" || formData.dni == "" || formData.apellido == "" || formData.direccion == "" || formData.password == ""){
+    if (formData.name == "" || formData.dni == "" || formData.direccion == ""){
       setModalErrorVisible(true);
-    } else {
-      event.preventDefault();
-      try {
-  
-        const response = await fetch('http://localhost:8080/api/usuario/solicitudClave', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({nombre: formData.name, dni:formData.dni, apellido:formData.apellido, direccion:formData.direccion})
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Something went wrong');
-        }
-        const responseData = await response.json();
-  
-        const response2 = await fetch('http://localhost:8080/api/usuario/generarClave', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({dni:formData.dni, password:formData.password})
-      });
-            const responseData2 = await response2.json();
-            if (responseData.message == "Created!"){
-              setModalExitoVisible(true);
-            }
-    } catch (error) {
-      if (error.message === 'Error in solicitudClave Service') {
-        setModalError2Visible(true);
-      } else {
-        console.error(error);
-      }
-    }
+    } else{
+      setModalExitoVisible(true);
     }
 };
 
@@ -90,16 +54,6 @@ const handleSubmit = async (event) => {
         value={formData.name}
         onChangeText={(text) => handleInputChange({ target: { name: 'name', value: text } })}
       />
-            <TextInput
-        style={styles.input}
-        placeholder="Apellido"
-        placeholderTextColor="darkgrey"
-        textAlign="center"
-        selectionColor="transparent"
-        name="apellido"
-        value={formData.apellido}
-        onChangeText={(text) => handleInputChange({ target: { name: 'apellido', value: text } })}
-      />
       <TextInput
         style={styles.input}
         placeholder="DNI"
@@ -120,20 +74,8 @@ const handleSubmit = async (event) => {
         value={formData.direccion}
         onChangeText={(text) => handleInputChange({ target: { name: 'direccion', value: text } })}
         />
-
-        <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor="darkgrey"
-        textAlign="center"
-        selectionColor="transparent"
-        name="password"
-        secureTextEntry={true}
-        value={formData.password}
-        onChangeText={(text) => handleInputChange({ target: { name: 'password', value: text } })}
-        />
       <Pressable style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Generar clave</Text>
+        <Text style={styles.buttonText}>Enviar</Text>
       </Pressable>
       <Link to="/buscarprom">
         <Text style={styles.linkText}>Entrar como invitado</Text>
@@ -144,14 +86,14 @@ const handleSubmit = async (event) => {
         transparent={false}
       >
         <View style={styles.modalExitoContainer}>
-        <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
+        <Pressable onPress={() => navigate(-2)} style={styles.backArrow}>
         <Image
           source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
           style={styles.arrowImage}
         />
         </Pressable>
           <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
-          <Text style={styles.boldText}>Su clave ha sido generada correctamente</Text>
+          <Text style={styles.boldText}>Su solicitud de clave ha sido recibida y la estamos evaluando.</Text>
         </View>
       </Modal>
       <Modal
@@ -163,19 +105,6 @@ const handleSubmit = async (event) => {
             <Text style={styles.modalErrorText}>Debes completar todos los datos</Text>
           </View>
           <Pressable onPress={() => setModalErrorVisible(false)} style={styles.closeErrorButton}>
-            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
-          </Pressable>
-        </View>
-      </Modal>
-      <Modal
-        visible={modalError2Visible}
-        transparent={true}
-      >
-        <View style={styles.modalErrorContainer}>
-          <View style={styles.redModal}>
-            <Text style={styles.modalErrorText}>Ya has generado tu clave</Text>
-          </View>
-          <Pressable onPress={() => setModalError2Visible(false)} style={styles.closeErrorButton}>
             <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
           </Pressable>
         </View>

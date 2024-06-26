@@ -8,6 +8,7 @@ const Perfil = () => {
   const { dni } = useParams();
 
   const [nombreVecino, setNombreVecino] = useState("");
+  const [apellidoVecino, setApellidoVecino] = useState("");
   const [direccion, setDireccion] = useState("");
 
 
@@ -18,6 +19,7 @@ const Perfil = () => {
         const data = await response.json();
         setNombreVecino(data.nombre);
         setDireccion(data.direccion);
+        setApellidoVecino(data.apellido);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -41,11 +43,11 @@ const Perfil = () => {
           source={require('../imagenes/user.png')} // Asegúrate de tener una imagen de usuario en tu proyecto
           style={styles.userImage}
         />
-        <Text style={styles.desc}>{nombreVecino}</Text>
+        <Text style={styles.desc}>{nombreVecino} {apellidoVecino}</Text>
       </View>
 
       <Text style={styles.boldText}>Vecino registrado del barrio</Text>
-      <Text style={styles.boldText}>DNI: {dni}</Text>
+      <Text style={styles.boldText}>{dni}</Text>
       <Text style={styles.boldText}>Dirección: {direccion}</Text>
 
       <Image

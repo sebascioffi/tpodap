@@ -43,8 +43,7 @@ const handleSubmit = async (event) => {
         if (responseData.message === "Usuario no encontrado"){
           setModalErrorVisible(true);
         } else{
-          await AsyncStorage.setItem('legajoInspector', formData.legajo);
-          await AsyncStorage.setItem('userDni', "0");
+          await AsyncStorage.setItem('userDni', responseData.documento);
           navigate(`/inspector/${formData.legajo}`)
         }
 } catch (error) {

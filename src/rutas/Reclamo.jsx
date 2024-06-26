@@ -7,6 +7,8 @@ const Reclamo = () => {
 
   const [reclamo, setReclamo] = useState({});
   const [desperfectoDescripcion, setDesperfectoDescripcion] = useState('');
+  const [desperfectoRubro, setDesperfectoRubro] = useState('');
+  const [rubro, setRubro] = useState('');
   const [sitio, setSitio] = useState('');
   const [vecino, setVecino] = useState('');
   const [movimientos, setMovimientos] = useState([]);
@@ -34,6 +36,7 @@ const Reclamo = () => {
         const response = await fetch(`http://localhost:8080/api/desperfectos/${idDesperfecto}`);
         const data = await response.json();
         setDesperfectoDescripcion(data.descripcion);
+        setDesperfectoRubro(data.idRubro);
       } catch (error) {
         console.error('Error fetching desperfecto data:', error);
       }
@@ -43,6 +46,25 @@ const Reclamo = () => {
       fetchDesperfecto(reclamo.idDesperfecto);
     }
   }, [reclamo.idDesperfecto]);
+
+  useEffect(() => {
+    const fetchRubro = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/rubros/${desperfectoRubro}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setRubro(data.descripcion);
+      } catch (error) {
+        console.error('Error fetching rubro:', error);
+      }
+    };
+
+    if (desperfectoRubro) {
+      fetchRubro();
+    }
+  }, [desperfectoRubro]);
 
   useEffect(() => {
     const fetchSitio = async (idSitio) => {
@@ -122,6 +144,7 @@ const Reclamo = () => {
           <Text style={styles.text}>Numero de Reclamo: {reclamo.idReclamo}</Text>
           <Text style={styles.text}>Generado por: {vecino}</Text>
           <Text style={styles.text}>Estado del Reclamo: {reclamo.estado}</Text>
+          <Text style={styles.text}>Rubro: {rubro}</Text>
           <Text style={styles.text}>Desperfecto: {desperfectoDescripcion}</Text>
           <Text style={styles.text}>Lugar del hecho: Calle {sitio}</Text>
           <Text style={styles.text}>Detalles: {reclamo.descripcion}</Text>
@@ -132,6 +155,7 @@ const Reclamo = () => {
                 <Text style={styles.boldText}>Movimiento {index + 1}:</Text>
                 <Text style={styles.text}>Responsable: {mov.responsable}</Text>
                 <Text style={styles.text}>Causa: {mov.causa}</Text>
+                <Text style={styles.text}>Fecha: {mov.fecha}</Text>
               </View>
             ))
           ) : (

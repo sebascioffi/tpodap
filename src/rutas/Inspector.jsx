@@ -84,7 +84,7 @@ const Inspector = () => {
                  </>
               </Link>
 
-              <Link to={`/reclamos`} component={Pressable} style={styles.pressableContainer}>
+              <Link to={`/reclamosInspector/${legajo}`} component={Pressable} style={styles.pressableContainer}>
                 <>
                 <Image
                  source={require("../imagenes/reclamos.png")}
@@ -94,7 +94,7 @@ const Inspector = () => {
                  </>
               </Link>
 
-              <Link to={`/genreclamo`} component={Pressable} style={styles.pressableContainer}>
+              <Link to={`/genreclamoInspector/${legajo}`} component={Pressable} style={styles.pressableContainer}>
                 <>
                 <Image
                  source={require("../imagenes/genreclamo.png")}

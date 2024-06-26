@@ -13,19 +13,10 @@ const Reclamos = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-      const fetchReclamos = async () => {
-        try {
-          const response = await fetch('http://localhost:8080/api/reclamos');
-          const data = await response.json();
-          setReclamos(data);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-  
       const fetchDni = async () => {
         try {
           const storedDni = await AsyncStorage.getItem('userDni');
+          console.log(storedDni);
           if (storedDni) {
             setDni(storedDni);
           }
@@ -33,12 +24,6 @@ const Reclamos = () => {
           console.error('Error retrieving DNI:', error);
         }
       };
-  
-      fetchReclamos();
-      fetchDni();
-    }, []);
-
-        useEffect(() => {
       const fetchReclamos = async () => {
         try {
           const response = await fetch('http://localhost:8080/api/reclamos');
@@ -46,17 +31,6 @@ const Reclamos = () => {
           setReclamos(data);
         } catch (error) {
           console.error('Error fetching data:', error);
-        }
-      };
-  
-      const fetchDni = async () => {
-        try {
-          const storedDni = await AsyncStorage.getItem('userDni');
-          if (storedDni) {
-            setDni(storedDni);
-          }
-        } catch (error) {
-          console.error('Error retrieving DNI:', error);
         }
       };
   

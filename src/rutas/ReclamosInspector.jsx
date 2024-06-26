@@ -1,38 +1,68 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Dimensions, TextInput, ScrollView, Button, TouchableOpacity } from 'react-native';
-import { Link, useNavigate } from 'react-router-native';
+import { Link, useNavigate, useParams } from 'react-router-native';
 
-const Denuncias = () => {
+const ReclamosInspector = () => {
 
+    const { legajo } = useParams();
     const [searchText, setSearchText] = useState('');
-    const [denuncias, setDenuncias] = useState([]);
     const [dni, setDni] = useState('');
+    const [reclamos, setReclamos] = useState([]);
+    const [viewMode, setViewMode] = useState('all'); // 'all' or 'mine'
+    const [rubroInspector, setRubroInspector] = useState('');
 
     const navigate = useNavigate();
 
     useEffect(() => {
-      const fetchDenuncias = async () => {
+        const fetchDni = async () => {
+            try {
+              const storedDni = await AsyncStorage.getItem('userDni');
+              console.log(storedDni);
+              if (storedDni) {
+                setDni(storedDni);
+              }
+            } catch (error) {
+              console.error('Error retrieving DNI:', error);
+            }
+          };
+      const fetchReclamos = async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/denuncias');
+          const response = await fetch(`http://localhost:8080/api/reclamos/filtrarPorInspector/${legajo}`);
           const data = await response.json();
-          const storedDni = await AsyncStorage.getItem('userDni');
-
-          // Filtrar las denuncias cuyo documento sea igual al dni
-          const denunciasFiltradas = data.filter(denuncia => denuncia.documento === storedDni);
-          
-          setDenuncias(denunciasFiltradas);
+          setReclamos(data);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
       };
   
-      fetchDenuncias();
+      fetchReclamos();
+      fetchDni();
     }, []);
 
-    const filteredDenuncias = denuncias.filter(den => {
-      return den.idDenuncia.toString().includes(searchText);
-    });
+    useEffect(() => {
+        const fetchInspectorData = async () => {
+          try {
+            const response = await fetch(`http://localhost:8080/api/personal/${legajo}`);
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            const inspector = await response.json();
+            setRubroInspector(inspector.sector);
+          } catch (error) {
+            console.error('Error al obtener los datos del inspector:', error);
+          }
+        };
+    
+        fetchInspectorData();
+      }, [legajo]);
+
+    const filteredReclamos = reclamos.length > 0 ? reclamos.filter(rec => {
+        if (viewMode === 'mine') {
+          return rec.documento === dni && rec.idReclamo.toString().includes(searchText);
+        }
+        return rec.idReclamo.toString().includes(searchText);
+      }) : [];
 
     
     return (
@@ -44,7 +74,20 @@ const Denuncias = () => {
         />
         </Pressable>
         <View style={styles.buttonContainer}>
+        <Pressable
+          style={[styles.buttonView, viewMode === 'all' && styles.selectedButton]}
+          onPress={() => setViewMode('all')}
+        >
+          <Text>Ver todos</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.buttonView, viewMode === 'mine' && styles.selectedButton]}
+          onPress={() => setViewMode('mine')}
+        >
+          <Text>Ver mis reclamos</Text>
+        </Pressable>
       </View>
+      <Text style={styles.boldText}>Mi sector: {rubroInspector}</Text>
           <View style={styles.inputContainer}>
             <Image
               source={require('../imagenes/lupa.png')} // Asegúrate de tener esta imagen en tu carpeta de imágenes
@@ -61,12 +104,12 @@ const Denuncias = () => {
           </View>
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {filteredDenuncias.map((den, index) => (
+      {filteredReclamos.map((rec, index) => (
         <View key={index} style={styles.reclamoContainer}>
-          <Text style={styles.reclamoText}>Denuncia: {den.idDenuncia}</Text>
-          <Text style={styles.reclamoText}>Estado: {den.estado}</Text>
+          <Text style={styles.reclamoText}>Reclamo: {rec.idReclamo}</Text>
+          <Text style={styles.reclamoText}>Estado: {rec.estado}</Text>
           <Pressable style={styles.button}>
-            <Link to={`/denuncia/${den.idDenuncia}`} component={Text} style={styles.buttonText}>
+            <Link to={`/reclamo/${rec.idReclamo}`} component={Text} style={styles.buttonText}>
                 <Text style={styles.seguimiento}>Ver Seguimiento</Text>
             </Link>
           </Pressable>
@@ -168,7 +211,15 @@ const Denuncias = () => {
       selectedButton: {
         backgroundColor: '#9BA4FA', // Color de fondo para el botón seleccionado
       },
+      boldText: {
+        fontSize: 23,
+        marginTop: 25,
+        marginBottom: 10,
+        fontWeight: 'bold',
+        textAlign: 'center',
+
+      },
   });
   
-  export default Denuncias;
+  export default ReclamosInspector;
 

@@ -12,7 +12,7 @@ const Servicios = () => {
     useEffect(() => {
       const fetchServicios = async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/promociones');
+          const response = await fetch('http://localhost:8080/api/promociones/buscarPorEstado/ACTIVO');
           const data = await response.json();
           setServicios(data);
         } catch (error) {

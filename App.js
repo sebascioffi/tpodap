@@ -21,6 +21,11 @@ import GenerarServicio from './src/rutas/GenerarServicio.jsx';
 import Perfil from './src/rutas/Perfil.jsx';
 import Declaracion from './src/rutas/Declaracion.jsx';
 import PerfilInspector from './src/rutas/PerfilInspector.jsx';
+import Contraseña from './src/rutas/Contraseña.jsx';
+import GenerarContraseña from './src/rutas/GenerarContraseña.jsx';
+import VecinoRegistrado from './src/rutas/VecinoRegistrado.jsx';
+import ReclamosInspector from './src/rutas/ReclamosInspector.jsx';
+import GenerarReclamoInspector from './src/rutas/GenerarReclamoInspector.jsx';
 
 export default function App() {
   return <>
@@ -30,6 +35,9 @@ export default function App() {
 
       <Route path="/logininspector" element={<LoginInspector />} />
       <Route path="/loginvecino" element={<LoginVecino />} />
+      <Route path="/introducirContraseña" element={<Contraseña />} />
+      <Route path="/generarContraseña/:dni" element={<GenerarContraseña />} />
+      <Route path="/vecinoRegistrado/:dni" element={<VecinoRegistrado />} />
 
       <Route path="/inspector/:legajo" element={<Inspector />} />
       <Route path="/vecino/:dni" element={<Vecino />} />
@@ -41,6 +49,7 @@ export default function App() {
       <Route path="/servicios" element={<Servicios />} />
       <Route path="/reclamos" element={<Reclamos />} />
       <Route path="/denuncias" element={<Denuncias />} />
+      <Route path="/reclamosInspector/:legajo" element={<ReclamosInspector />} />
 
       <Route path="/promocion/:id" element={<Promocion />} />
       <Route path="/reclamo/:id" element={<Reclamo />} />
@@ -51,7 +60,8 @@ export default function App() {
       <Route path="/genreclamo" element={<GenerarReclamo />} />
       <Route path="/genpromocion" element={<GenerarPromocion />} />
       <Route path="/gencomercio" element={<GenerarComercio />} />
-      <Route path="/genservicio" element={<GenerarServicio />} />
+      <Route path="/genservicio" element={<GenerarServicio />} />    
+      <Route path="/genreclamoInspector/:legajo" element={<GenerarReclamoInspector />} />    
 
       <Route path="/perfil/:dni" element={<Perfil />} />
       <Route path="/perfil/inspector/:legajo" element={<PerfilInspector />} />

@@ -130,7 +130,7 @@ const GenerarReclamo = () => {
 
   }
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
         <Pressable onPress={() => navigate(-1)} style={styles.backArrow}>
         <Image
           source={require('../imagenes/volver.png')} // Asegúrate de tener una imagen de flecha en tu proyecto
@@ -154,18 +154,22 @@ const GenerarReclamo = () => {
 
 
       <Text style={styles.label}>Lugar del Hecho: *</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={lugar}
-          onValueChange={(itemValue) => setLugar(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccionar..." value="" />
-          {sitios.map((item) => (
-            <Picker.Item key={item.idSitio} label={item.calle + " " + item.numero} value={item.idSitio} />
-          ))}
-        </Picker>
-      </View>
+<View style={styles.pickerContainer}>
+  <Picker
+    selectedValue={lugar}
+    onValueChange={(itemValue) => setLugar(itemValue)}
+    style={styles.picker}
+  >
+    <Picker.Item label="Seleccionar..." value="" />
+    {sitios.map((item) => (
+      <Picker.Item
+        key={item.idSitio}
+        label={item.calle + " " + item.numero}
+        value={item.idSitio}
+      />
+    ))}
+  </Picker>
+</View>
 
       <Text style={styles.label}>Detalles: *</Text>
       <TextInput
@@ -247,7 +251,7 @@ const GenerarReclamo = () => {
       <Pressable style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Enviar</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -292,8 +296,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         width: '100%', // Asegura que el contenedor tome el ancho completo
         outlineStyle: 'none',
-      },
-      picker: {
+      },     
+       picker: {
         borderWidth: 1,
         borderColor: '#AEAEAE',
         borderRadius: 5,

@@ -238,7 +238,7 @@ const GenerarServicio = () => {
         />
         </Pressable>
           <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
-          <Text style={styles.boldText}>La solicitud de servicio se envió correctamente</Text>
+          <Text style={styles.boldText}>La solicitud de servicio se envió correctamente y el municipio la está evaluando.</Text>
         </View>
       </Modal>
 

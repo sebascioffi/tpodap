@@ -1,22 +1,25 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TextInput, Pressable } from 'react-native';
 import { Modal } from 'react-native';
-import { Link, useNavigate } from 'react-router-native';
+import { Link, useNavigate, useParams } from 'react-router-native';
 
 const screenWidth = Dimensions.get('window').width;
 
-const LoginVecino = () => {
+const VecinoRegistrado = () => {
 
   const navigate = useNavigate();
+  const { dni } = useParams();
 
+  const [modalErrorVisible, setModalErrorVisible] = useState(false);
   const [modalError2Visible, setModalError2Visible] = useState(false);
   const [modalError3Visible, setModalError3Visible] = useState(false);
+  const [modalError4Visible, setModalError4Visible] = useState(false);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
 
 
   const [formData, setFormData] = useState({
-    dni: '',
-    email: ''
+    contraseña: ''
   });
 
   const handleInputChange = (event) => {
@@ -28,29 +31,38 @@ const LoginVecino = () => {
 };
 
 const handleSubmit = async (event) => {
-  if (formData.dni == "" || formData.password == ""){
+  if (formData.contraseña == ""){
     setModalError2Visible(true)
   } else{
     event.preventDefault();
     try {
-      const response2 = await fetch('http://localhost:8080/api/usuario/solicitudClave', {
+      const response2 = await fetch('http://localhost:8080/api/usuario/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({dni:formData.dni, email:formData.email})
+            body: JSON.stringify({dni:dni, password:formData.contraseña})
         });
             const responseData2 = await response2.json();
-            console.log(responseData2);
-            if (responseData2.message === "Created!"){
-              setModalExitoVisible(true)
-            }
-            if (responseData2.message === "Vecino Inexistente"){
+            if (responseData2.status === 200){
+              console.log(responseData2);
+              await AsyncStorage.setItem('userDni', dni);
+              if (!responseData2.user.claveGenerada){
+               setModalExitoVisible(true);
+              } else{
+               navigate(`/vecino/${dni}`)
+              }
+             }
+            
+             if (responseData2.status === 403){
+              setModalError4Visible(true)
+           }
+            if (responseData2.status === 404){
               setModalError3Visible(true)
             }
-            if (responseData2.message === "Vecino ya registrado"){
-              navigate(`/vecinoRegistrado/${formData.dni}`);
-            }
+            if (responseData2.status === 401){
+                setModalErrorVisible(true)
+              }
   } catch (error) {
       console.error("Error:", error);
   }
@@ -72,34 +84,34 @@ const handleSubmit = async (event) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="DNI"
+        placeholder="Contraseña"
         placeholderTextColor="darkgrey"
         textAlign="center"
+        secureTextEntry={true} 
         selectionColor="transparent"
-        name="dni"
-        value={formData.dni}
-        onChangeText={(text) => handleInputChange({ target: { name: 'dni', value: text } })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="darkgrey"
-        textAlign="center"
-        selectionColor="transparent"
-        name="email"
-        value={formData.email}
-        onChangeText={(text) => handleInputChange({ target: { name: 'email', value: text } })}
+        name="contraseña"
+        value={formData.contraseña}
+        onChangeText={(text) => handleInputChange({ target: { name: 'contraseña', value: text } })}
       />
       <Pressable style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Entrar</Text>
       </Pressable>
-      <Link to="/buscarprom">
-        <Text style={styles.linkText}>Entrar como invitado</Text>
-      </Link>
-      <Link to="/generarclave">
-        <Text style={styles.linkText}>Generar clave</Text>
+      <Link to="/introducirContraseña">
+        <Text style={styles.linkText}>Olvidé mi clave</Text>
       </Link>
 
+      <Modal
+        visible={modalErrorVisible}
+        transparent={true}      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Contraseña Incorrecta</Text>
+          </View>
+          <Pressable onPress={() => setModalErrorVisible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
       <Modal
         visible={modalError2Visible}
         transparent={true}      >
@@ -125,6 +137,18 @@ const handleSubmit = async (event) => {
         </View>
       </Modal>
       <Modal
+        visible={modalError4Visible}
+        transparent={true}      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Vecino no habilitado</Text>
+          </View>
+          <Pressable onPress={() => setModalError4Visible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
+      <Modal
         visible={modalExitoVisible}
         transparent={false}
       >
@@ -136,8 +160,8 @@ const handleSubmit = async (event) => {
         />
         </Pressable>
           <Image source={require("../imagenes/correcto.png")} resizeMode="contain" />
-          <Text style={styles.boldText}>Tu solicitud fue creada correctamente. Te enviaremos la clave cuando esté aprobada.</Text>
-          <Link to={`/introducirContraseña`} component={Pressable} style={[styles.buttonaceptar, styles.acceptButton]}>
+          <Text style={styles.boldText}>Debes cambiar tu clave para ingresar</Text>
+          <Link to={`/generarContraseña/${dni}`} component={Pressable} style={[styles.buttonaceptar, styles.acceptButton]}>
           <Text style={styles.buttonText}>Aceptar</Text>
         </Link>
         </View>
@@ -184,6 +208,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 5,
     alignItems: 'center',
+  },
+  acceptButton: {
+    backgroundColor: 'green',
   },
   buttonText: {
     color: 'white',
@@ -234,20 +261,21 @@ const styles = StyleSheet.create({
       zIndex: 1,
     },
     modalExitoContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'transparent',
-    },
-    boldText: {
-      fontSize: 23,
-      fontWeight: 'bold',
-      marginBottom: 10,
-      textAlign: 'center',
-    },
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+      },
+      boldText: {
+        fontSize: 23,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        textAlign: 'center',
+      },
     acceptButton: {
       backgroundColor: 'green',
+      marginRight: 10,
     },
 });
 
-export default LoginVecino;
+export default VecinoRegistrado;

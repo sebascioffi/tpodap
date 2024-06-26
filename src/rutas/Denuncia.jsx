@@ -1,11 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { useParams, useNavigate } from 'react-router-native';
-import denuncias from "../ejemploDenuncias.js"
 
 const Denuncia = () => {
   const { id } = useParams();
-  const denuncia = denuncias.find(den => den.id === parseInt(id));
+
+  const [denuncia, setDenuncia] = useState({});
+  const [sitio, setSitio] = useState('');
+  const [vecino, setVecino] = useState('');
+  const [movimientos, setMovimientos] = useState([]);
+  const [fotos, setFotos] = useState([]);
+
+  useEffect(() => {
+    const fetchDenuncia = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/denuncias/${id}`);
+        const data = await response.json();
+        setDenuncia(data.denuncia);
+        setMovimientos(data.movimientosDenuncia);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchDenuncia();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchSitio = async (idSitio) => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/sitios/${idSitio}`);
+        const data = await response.json();
+        setSitio(`${data.calle} ${data.numero}`);
+      } catch (error) {
+        console.error('Error fetching desperfecto data:', error);
+      }
+    };
+
+    if (denuncia.idSitio) {
+      fetchSitio(denuncia.idSitio);
+    }
+  }, [denuncia.idSitio]);
+
+
+  useEffect(() => {
+    const fetchVecino = async (documento) => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/usuario/buscar/${documento}`);
+        const data = await response.json();
+        setVecino(`${data.nombre} ${data.apellido}`);
+      } catch (error) {
+        console.error('Error fetching desperfecto data:', error);
+      }
+    };
+
+    if (denuncia.documento) {
+      fetchVecino(denuncia.documento);
+    }
+  }, [denuncia.documento]);
+
+  useEffect(() => {
+    const fetchDenunciaFotos = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/denunciasmultimedia/${id}`);
+        const data = await response.json();
+        setFotos(data.fotos);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchDenunciaFotos();
+  }, [id]);
 
   const navigate = useNavigate();
 
@@ -20,27 +86,39 @@ const Denuncia = () => {
       
       {denuncia && (
         <>
-          <Text style={styles.text}>Numero de denuncia: {denuncia.id}</Text>
-          <Text style={styles.text}>Estado de la denuncia: {denuncia.estado}</Text>
-          <Text style={styles.text}>Nombre del {denuncia.tipo} denunciado: {denuncia.nombre}</Text>
-          <Text style={styles.text}>Título: {denuncia.titulo}</Text>
-          <Text style={styles.text}>Lugar del hecho: {denuncia.lugar}</Text>
-          <Text style={styles.text}>Detalle: {denuncia.detalle}</Text>
-          <Text style={styles.text}>Pruebas añadidas:</Text>
-          
-          {denuncia.pruebas && denuncia.pruebas.length > 0 ? (
-            denuncia.pruebas.map((prueba, index) => (
-              <View key={index} style={styles.pruebaContainer}>
-                <Text style={styles.pruebaNombre}>{prueba.nombre}</Text>
-                <Image
-                  source={{ uri: prueba.uri }}
-                  style={styles.pruebaImagen}
-                />
+          <Text style={styles.text}>Numero de Denuncia: {denuncia.idDenuncia}</Text>
+          <Text style={styles.text}>Generado por: {vecino}</Text>
+          <Text style={styles.text}>Estado del Reclamo: {denuncia.estado}</Text>
+          <Text style={styles.text}>Lugar del hecho: Calle {sitio}</Text>
+          <Text style={styles.text}>Detalles: {denuncia.descripcion}</Text>
+
+          {movimientos && movimientos.length > 0 ? (
+            movimientos.map((mov, index) => (
+              <View key={index}>
+                <Text style={styles.boldText}>Movimiento {index + 1}:</Text>
+                <Text style={styles.text}>Responsable: {mov.responsable}</Text>
+                <Text style={styles.text}>Causa: {mov.causa}</Text>
+                <Text style={styles.text}>Fecha: {mov.fecha}</Text>
               </View>
             ))
           ) : (
-            <Text style={styles.text}>No hay pruebas añadidas.</Text>
+            <Text style={styles.boldText}>No hay movimientos añadidos.</Text>
           )}
+          
+          {fotos && fotos.length > 0 ? (
+  <>
+    <Text style={styles.boldText}>Pruebas adjuntas:</Text>
+    {fotos.map((prueba, index) => (
+      <Image
+        key={index}
+        source={{ uri: prueba.uri }}
+        style={styles.image}
+      />
+    ))}
+  </>
+) : (
+  <Text style={styles.boldText}>No hay pruebas añadidas.</Text>
+)}
         </>
       )}
     </ScrollView>
@@ -52,7 +130,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   backArrow: {
-    marginBottom: 20,
+    marginBottom: 60,
   },
   arrowImage: {
     width: 30,
@@ -73,6 +151,17 @@ const styles = StyleSheet.create({
   pruebaImagen: {
     width: 100,
     height: 100,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
   },
 });
 

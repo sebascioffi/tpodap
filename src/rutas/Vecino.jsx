@@ -8,6 +8,7 @@ const Vecino = () => {
   const { dni } = useParams();
 
   const [nombreVecino, setNombreVecino] = useState("");
+  const [apellidoVecino, setApellidoVecino] = useState("");
 
   useEffect(() => {
     const fetchUsuario = async () => {
@@ -15,6 +16,7 @@ const Vecino = () => {
         const response = await fetch(`http://localhost:8080/api/usuario/buscarPorDni/${dni}`);
         const data = await response.json();
         setNombreVecino(data.nombre);
+        setApellidoVecino(data.apellido);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -36,10 +38,10 @@ const Vecino = () => {
 
       <View style={styles.userContainer}>
         <Image
-          source={require('../imagenes/user.png')} // Asegúrate de tener una imagen de usuario en tu proyecto
+          source={require('../imagenes/user.png')} 
           style={styles.userImage}
         />
-        <Text style={styles.desc}>Vecino {nombreVecino}</Text>
+        <Text style={styles.desc}>Vecino {nombreVecino} {apellidoVecino}</Text>
       </View>
 
       <Text style={styles.boldText}>Bienvenido Vecino!</Text>
