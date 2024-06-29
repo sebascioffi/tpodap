@@ -11,7 +11,7 @@
   "dependencies": {
     "@expo/metro-runtime": "~3.2.1",
     "@react-native-async-storage/async-storage": "^1.23.1",
-    "@react-native-picker/picker": "^2.7.6",
+    "@react-native-picker/picker": "2.7.5",
     "expo": "~51.0.7",
     "expo-document-picker": "~12.0.1",
     "expo-file-system": "~17.0.1",
@@ -22,9 +22,12 @@
     "react-dom": "18.2.0",
     "react-native": "0.74.1",
     "react-native-document-picker": "^9.2.0",
+    "react-native-paper": "^5.12.3",
+    "react-native-picker-select": "^9.1.3",
     "react-native-web": "~0.19.10",
     "react-router-dom": "^6.23.1",
     "react-router-native": "^6.23.1",
+    "react-select": "^5.8.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

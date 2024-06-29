@@ -15,6 +15,8 @@ const GenerarReclamoInspector = () => {
   const [desperfectos, setDesperfectos] = useState([]);
   const [sitios, setSitios] = useState([]);
   const [lugar, setLugar] = useState('');
+  const [calle, setCalle] = useState('');
+  const [numero, setNumero] = useState('');
   const [detalles, setDetalles] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,16 +27,16 @@ const GenerarReclamoInspector = () => {
 
   const navigate = useNavigate();
 
-  const getDni = async () => {
+  const getLegajo = async () => {
     try {
-      const dni = await AsyncStorage.getItem('userDni');
-      if (dni !== null) {
-        return dni;
+      const legajo = await AsyncStorage.getItem('legajoInspector');
+      if (legajo !== null) {
+        return legajo;
       } else {
         return null;
       }
     } catch (error) {
-      console.error('Error recuperando el DNI:', error);
+      console.error('Error recuperando el legajo:', error);
       return null;
     }
   };
@@ -89,12 +91,19 @@ const GenerarReclamoInspector = () => {
       try {
         const response = await fetch('http://localhost:8080/api/sitios');
         const data = await response.json();
-        setSitios(data);
+  
+        // Agregar el sitio especial "Otro" con value null al final de la lista
+        const sitiosConOtro = [
+          ...data,
+          { idSitio: null, calle: "Otro", numero: "" }  // Asegúrate de ajustar 'numero' según tus necesidades
+        ];
+  
+        setSitios(sitiosConOtro);
       } catch (error) {
-        console.error('Error fetching desperfectos:', error);
+        console.error('Error fetching sitios:', error);
       }
     };
-
+  
     fetchSitios();
   }, []);
 
@@ -125,7 +134,7 @@ const GenerarReclamoInspector = () => {
 
 
   const handleSubmit = async(event) => {
-    if (desperfecto == "" || lugar == "" || detalles == ""){
+    if (desperfecto == "" || ((lugar === "" || lugar === "Otro" )&& (calle == "" || numero == "")) || detalles == ""){
       setModalErrorVisible(true)
     } else{
       console.log("Cargando Reclamo");
@@ -136,18 +145,25 @@ const GenerarReclamoInspector = () => {
           return { uri: url, name: archivo.fileName };
         }));
       }
-      const dni = await getDni();
+      const legajo = await getLegajo();
+      let detallesActualizados = detalles;
+      let lugarActualizado = lugar;
+      if (lugar === "Otro") {
+        lugarActualizado = null;
+        detallesActualizados += ` Calle: ${calle}, Número: ${numero}`;
+      }
       try {
-        const response = await fetch('http://localhost:8080/api/reclamos', {
+        console.log(lugarActualizado);
+        const response = await fetch('http://localhost:8080/api/reclamosInspector', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({documento:dni,idSitio:lugar, idDesperfecto:desperfecto,descripcion:detalles,estado:"Pendiente"})
+            body: JSON.stringify({legajo:legajo,idSitio:lugarActualizado, idDesperfecto:desperfecto,descripcion:detallesActualizados,estado:"Iniciado"})
         });
             const responseData = await response.json();
             setNumReclamo(responseData.id);
-            const response2 = await fetch('http://localhost:8080/api/reclamosmultimedia', {
+            const response2 = await fetch('http://localhost:8080/api/reclamosmultimediainspector', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -203,7 +219,24 @@ const GenerarReclamoInspector = () => {
     ))}
   </Picker>
 </View>
-
+{lugar === "Otro" && (
+  <>
+    <Text style={styles.label}>Calle: *</Text>
+    <TextInput
+      style={[styles.input]}
+      placeholderTextColor="darkgrey"
+      value={calle}
+      onChangeText={setCalle}
+    />
+    <Text style={styles.label}>Numero: *</Text>
+    <TextInput
+      style={[styles.input]}
+      placeholderTextColor="darkgrey"
+      value={numero}
+      onChangeText={setNumero}
+    />
+  </>
+)}
       <Text style={styles.label}>Detalles: *</Text>
       <TextInput
         style={[styles.input, styles.detallesInput]}
@@ -242,7 +275,7 @@ const GenerarReclamoInspector = () => {
       >
         <View style={styles.modalContainer}>
           <Pressable onPress={handleCloseModal} style={styles.closeButton}>
-            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} tintColor={'white'} />
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} tintColor={'black'} />
           </Pressable>
           <Image source={{ uri: selectedImage?.uri }} style={styles.fullImage} resizeMode="contain" />
         </View>
@@ -293,7 +326,8 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         padding: 20,
         justifyContent: 'center',
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       label: {
         fontSize: 16,
@@ -302,41 +336,64 @@ const styles = StyleSheet.create({
       },
       input: {
         borderWidth: 1,
-        borderColor: '#AEAEAE',
-        borderRadius: 5,
-        marginBottom: 20,
+        marginBottom: 10,
         padding: 10,
-        width: "100%",
         fontSize: 16,
+        outlineStyle: 'none',
+        width: '100%', // Ajustar el ancho para un mejor diseño
+        height: 40, // Aumentar la altura para una mejor accesibilidad
+        borderColor: '#6BAADB', // Color de borde que combina con los botones
+        borderRadius: 10, // Bordes redondeados para un aspecto moderno
+        color: 'black', // Color del texto
+        backgroundColor: '#fff', // Fondo blanco para contraste
+        shadowColor: '#000', // Sombra para profundidad
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 5,
         outlineStyle: 'none',
       },
       textArea: {
         height: 100,
       },
       submitButton: {
-        backgroundColor: 'black',
         padding: 9,
         alignItems: 'center',
-        borderRadius: 5,
         width: 70,
-        marginTop: 15,
+        marginTop: 10,
+        backgroundColor: '#6BAADB', // Softer, more appealing color
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        borderRadius: 25, // More rounded corners for a modern look
+        shadowColor: '#000', // Adding shadow for depth
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
       },
       submitButtonText: {
         color: 'white',
         fontSize: 16,
+        fontWeight: "bold",
       },
       pickerContainer: {
         marginBottom: 20,
         width: '100%', // Asegura que el contenedor tome el ancho completo
         outlineStyle: 'none',
       },     
-       picker: {
+      picker: {
         borderWidth: 1,
-        borderColor: '#AEAEAE',
+        borderColor: '#6BAADB',
         borderRadius: 5,
         padding: 10,
         width: "100%",
         fontSize: 16,
+        outlineStyle: 'none',
+        shadowColor: '#000', // Sombra para profundidad
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 5,
         outlineStyle: 'none',
       },
       boldText: {
@@ -373,7 +430,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'black',
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       closeButton: {
         position: 'absolute',
@@ -421,6 +478,9 @@ const styles = StyleSheet.create({
       labelExito: {
         fontSize: 16,
         marginVertical: 10,
+      },
+      detallesInput:{
+        height: 55,
       }
 });
 

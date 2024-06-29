@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { useParams, useNavigate } from 'react-router-native';
@@ -10,6 +11,7 @@ const Denuncia = () => {
   const [vecino, setVecino] = useState('');
   const [movimientos, setMovimientos] = useState([]);
   const [fotos, setFotos] = useState([]);
+  const [verDenunciante, setVerDenunciante] = useState(true);
 
   useEffect(() => {
     const fetchDenuncia = async () => {
@@ -18,6 +20,20 @@ const Denuncia = () => {
         const data = await response.json();
         setDenuncia(data.denuncia);
         setMovimientos(data.movimientosDenuncia);
+        const dni = await AsyncStorage.getItem('userDni');
+        console.log(dni);
+        const responseVecinos = await fetch(`http://localhost:8080/api/denuncias/vecinosDenunciados/${dni}`);
+      const dataVecinos = await responseVecinos.json();
+      console.log(dataVecinos);
+      // Verifica si alguna denuncia tiene el mismo idDenuncia
+      const idNumber = parseInt(id, 10); // Convertir id a entero usando parseInt con base 10
+
+const hayDenuncia = dataVecinos.some(denuncia => denuncia.idDenuncia === idNumber);
+
+
+      if (hayDenuncia) {
+        setVerDenunciante(false);
+      }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -83,13 +99,16 @@ const Denuncia = () => {
           style={styles.arrowImage}
         />
       </Pressable>
-      
       {denuncia && (
         <>
           <Text style={styles.text}>Numero de Denuncia: {denuncia.idDenuncia}</Text>
-          <Text style={styles.text}>Generado por: {vecino}</Text>
+          {verDenunciante ? (
+  <Text style={styles.text}>Generado por: {vecino}</Text>
+): (
+  <Text style={styles.text}>No puedes ver quien hizo la denuncia</Text>
+)}
           <Text style={styles.text}>Estado del Reclamo: {denuncia.estado}</Text>
-          <Text style={styles.text}>Lugar del hecho: Calle {sitio}</Text>
+          {sitio && <Text style={styles.text}>Lugar del hecho: {sitio}</Text>}
           <Text style={styles.text}>Detalles: {denuncia.descripcion}</Text>
 
           {movimientos && movimientos.length > 0 ? (
@@ -128,6 +147,7 @@ const Denuncia = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   backArrow: {
     marginBottom: 60,

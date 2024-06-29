@@ -19,8 +19,15 @@ const Reclamo = () => {
       try {
         const response = await fetch(`http://localhost:8080/api/reclamos/${id}`);
         const data = await response.json();
-        setReclamo(data.reclamo);
-        setMovimientos(data.movimientosReclamo);
+        if (data.message === "Reclamo Inexistente") {
+          const inspectorResponse = await fetch(`http://localhost:8080/api/reclamosInspector/${id}`);
+          const inspectorData = await inspectorResponse.json();
+          setReclamo(inspectorData.reclamoInspector);
+          setMovimientos(inspectorData.movimientosReclamoInspector);
+        } else {
+          setReclamo(data.reclamo);
+          setMovimientos(data.movimientosReclamo);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -82,21 +89,33 @@ const Reclamo = () => {
     }
   }, [reclamo.idSitio]);
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchVecino = async (documento) => {
       try {
         const response = await fetch(`http://localhost:8080/api/usuario/buscar/${documento}`);
         const data = await response.json();
         setVecino(`${data.nombre} ${data.apellido}`);
       } catch (error) {
-        console.error('Error fetching desperfecto data:', error);
+        console.error('Error fetching usuario data:', error);
       }
     };
-
+  
+    const fetchPersonal = async (legajo) => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/personal/${legajo}`);
+        const data = await response.json();
+        setVecino(`${data.nombre} ${data.apellido}`);
+      } catch (error) {
+        console.error('Error fetching personal data:', error);
+      }
+    };
+  
     if (reclamo.documento) {
       fetchVecino(reclamo.documento);
+    } else if (reclamo.legajo) {
+      fetchPersonal(reclamo.legajo);
     }
-  }, [reclamo.documento]);
+  }, [reclamo.documento, reclamo.legajo]);
 
   useEffect(() => {
     const fetchVecino = async (documento) => {
@@ -117,14 +136,21 @@ const Reclamo = () => {
   useEffect(() => {
     const fetchReclamoFotos = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/reclamosmultimedia/${id}`);
-        const data = await response.json();
-        setFotos(data.fotos);
+        let response = await fetch(`http://localhost:8080/api/reclamosmultimedia/${id}`);
+        let data = await response.json();
+        
+        if (data.fotos && data.fotos.length > 0) {
+          setFotos(data.fotos);
+        } else {
+          response = await fetch(`http://localhost:8080/api/reclamosmultimediainspector/${id}`);
+          data = await response.json();
+          setFotos(data.fotos || []); // Establece fotos en un array vacío si no se encuentran fotos
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-
+  
     fetchReclamoFotos();
   }, [id]);
 
@@ -146,7 +172,7 @@ const Reclamo = () => {
           <Text style={styles.text}>Estado del Reclamo: {reclamo.estado}</Text>
           <Text style={styles.text}>Rubro: {rubro}</Text>
           <Text style={styles.text}>Desperfecto: {desperfectoDescripcion}</Text>
-          <Text style={styles.text}>Lugar del hecho: Calle {sitio}</Text>
+          {sitio && <Text style={styles.text}>Lugar del hecho: {sitio}</Text>}
           <Text style={styles.text}>Detalles: {reclamo.descripcion}</Text>
 
           {movimientos && movimientos.length > 0 ? (
@@ -185,6 +211,7 @@ const Reclamo = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   backArrow: {
     marginBottom: 60,

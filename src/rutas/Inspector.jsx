@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   image: {
     width: screenWidth,
@@ -167,12 +168,19 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: 'bold',
     textAlign: 'center',
+    borderBottomWidth: 4,
+borderBottomColor: '#6BAADB', 
+paddingBottom: 5, // Espacio interno para el borde inferior
   },
   boldText: {
     fontSize: 23,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
+    color: '#333', // Texto en un tono gris oscuro para buen contraste
+    borderBottomWidth: 2, // Añadir un borde inferior
+    borderBottomColor: '#6BAADB', // Color del borde que combina con el tema
+    paddingBottom: 5, // Espacio interno para el borde inferior
   },
   modalContainer: {
     flex: 1,

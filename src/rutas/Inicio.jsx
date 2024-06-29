@@ -31,25 +31,32 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   image: {
     width: screenWidth,
     aspectRatio: 1.5,
     resizeMode: 'contain',
-    marginBottom: 20
+    marginBottom: 30, // Adjusted margin for better spacing
   },
   button: {
-    backgroundColor: 'black',
+    backgroundColor: '#6BAADB', // Softer, more appealing color
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 5,
+    borderRadius: 25, // More rounded corners for a modern look
     marginVertical: 10,
     width: screenWidth * 0.8,
     alignItems: 'center',
+    shadowColor: '#000', // Adding shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: 'bold', // Bold text for better readability
   },
 });
 

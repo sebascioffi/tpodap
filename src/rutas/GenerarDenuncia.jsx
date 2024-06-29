@@ -13,7 +13,10 @@ const GenerarDenuncia = () => {
   const [lugar, setLugar] = useState('');
   const [sitios, setSitios] = useState([]);
   const [nombre, setNombre] = useState('');
+  const [calle, setCalle] = useState('');
+  const [numero, setNumero] = useState('');
   const [detalle, setDetalle] = useState('');
+  const [documento, setDocumento] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -28,12 +31,19 @@ const GenerarDenuncia = () => {
       try {
         const response = await fetch('http://localhost:8080/api/sitios');
         const data = await response.json();
-        setSitios(data);
+  
+        // Agregar el sitio especial "Otro" con value null al final de la lista
+        const sitiosConOtro = [
+          ...data,
+          { idSitio: null, calle: "Otro", numero: "" }  // Asegúrate de ajustar 'numero' según tus necesidades
+        ];
+  
+        setSitios(sitiosConOtro);
       } catch (error) {
-        console.error('Error fetching desperfectos:', error);
+        console.error('Error fetching sitios:', error);
       }
     };
-
+  
     fetchSitios();
   }, []);
 
@@ -79,11 +89,11 @@ const GenerarDenuncia = () => {
 
 
   const handleSubmit = async(event) => {
-    if (tipo == "" || nombre == "" || lugar == "" || detalle == ""){
+    if (tipo == "" || nombre == "" || ((lugar === "" || lugar === "Otro" )&& (calle == "" || numero == "")) || detalle == ""){
       setModalErrorVisible(true)
     } else{
       console.log("Cargando Denuncia");
-      const nuevoDetalle = `Nombre del ${tipo} denunciado: ${nombre}`;
+      const nuevoDetalle = `Nombre del ${tipo} denunciado: ${nombre}` + (documento !== "" ? `, Documento: ${documento}` : "");
       const detalleCompleto = `${detalle}. ${nuevoDetalle}`;
       let fotos = [];
       if (archivos.length > 0) {
@@ -93,13 +103,19 @@ const GenerarDenuncia = () => {
         }));
       }
       const dni = await getDni();
+      let lugarActualizado = lugar;
+      let detallesActualizados = detalleCompleto;
+      if (lugar === "Otro") {
+        lugarActualizado = null;
+        detallesActualizados += ` Lugar de la denuncia: Calle: ${calle}, Número: ${numero}`;
+      }
       try {
         const response = await fetch('http://localhost:8080/api/denuncias', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({documento:dni,idSitio:lugar,descripcion:detalleCompleto,estado:"Pendiente",aceptaResponsabilidad:1})
+            body: JSON.stringify({documento:dni,idSitio:lugarActualizado,descripcion:detallesActualizados,estado:"Pendiente",aceptaResponsabilidad:1, documentoDenunciado: documento})
         });
             const responseData = await response.json();
             console.log(responseData);
@@ -157,6 +173,13 @@ const GenerarDenuncia = () => {
 
 {tipo === 'vecino' && (
   <>
+            <Text style={styles.label}>Documento del vecino: </Text>
+          <TextInput
+            style={styles.input}
+            placeholderTextColor="black"
+            value={documento}
+            onChangeText={setDocumento}
+          />
           <Text style={styles.label}>Nombre del vecino: *</Text>
           <TextInput
             style={styles.input}
@@ -184,7 +207,24 @@ const GenerarDenuncia = () => {
     ))}
   </Picker>
 </View>
-
+{lugar === "Otro" && (
+  <>
+    <Text style={styles.label}>Calle: *</Text>
+    <TextInput
+      style={[styles.input]}
+      placeholderTextColor="darkgrey"
+      value={calle}
+      onChangeText={setCalle}
+    />
+    <Text style={styles.label}>Numero: *</Text>
+    <TextInput
+      style={[styles.input]}
+      placeholderTextColor="darkgrey"
+      value={numero}
+      onChangeText={setNumero}
+    />
+  </>
+)}
       <Text style={styles.label}>Descripción: *</Text>
       <TextInput
         style={[styles.input, styles.detallesInput]}
@@ -223,7 +263,7 @@ const GenerarDenuncia = () => {
       >
         <View style={styles.modalContainer}>
           <Pressable onPress={handleCloseModal} style={styles.closeButton}>
-            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} tintColor={'white'} />
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} tintColor={'black'} />
           </Pressable>
           <Image source={{ uri: selectedImage?.uri }} style={styles.fullImage} resizeMode="contain" />
         </View>
@@ -274,7 +314,8 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         padding: 20,
         justifyContent: 'center',
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       label: {
         fontSize: 16,
@@ -283,28 +324,45 @@ const styles = StyleSheet.create({
       },
       input: {
         borderWidth: 1,
-        borderColor: '#AEAEAE',
-        borderRadius: 5,
         marginBottom: 10,
         padding: 10,
-        width: "100%",
         fontSize: 16,
+        outlineStyle: 'none',
+        width: '100%', // Ajustar el ancho para un mejor diseño
+        height: 40, // Aumentar la altura para una mejor accesibilidad
+        borderColor: '#6BAADB', // Color de borde que combina con los botones
+        borderRadius: 10, // Bordes redondeados para un aspecto moderno
+        color: 'black', // Color del texto
+        backgroundColor: '#fff', // Fondo blanco para contraste
+        shadowColor: '#000', // Sombra para profundidad
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 5,
         outlineStyle: 'none',
       },
       textArea: {
         height: 100,
       },
       submitButton: {
-        backgroundColor: 'black',
         padding: 9,
         alignItems: 'center',
-        borderRadius: 5,
         width: 70,
         marginTop: 10,
+        backgroundColor: '#6BAADB', // Softer, more appealing color
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        borderRadius: 25, // More rounded corners for a modern look
+        shadowColor: '#000', // Adding shadow for depth
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
       },
       submitButtonText: {
         color: 'white',
         fontSize: 16,
+        fontWeight: "bold",
       },
       pickerContainer: {
         marginBottom: 10,
@@ -313,11 +371,17 @@ const styles = StyleSheet.create({
       },
       picker: {
         borderWidth: 1,
-        borderColor: '#AEAEAE',
+        borderColor: '#6BAADB',
         borderRadius: 5,
         padding: 10,
         width: "100%",
         fontSize: 16,
+        outlineStyle: 'none',
+        shadowColor: '#000', // Sombra para profundidad
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 5,
         outlineStyle: 'none',
       },
       boldText: {
@@ -354,7 +418,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'black',
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       closeButton: {
         position: 'absolute',
@@ -397,11 +461,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'transparent',
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       labelExito: {
         fontSize: 16,
         marginVertical: 10,
+      },
+      detallesInput:{
+        height: 55,
       }
 });
 

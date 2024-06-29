@@ -8,7 +8,7 @@ const Reclamos = () => {
     const [searchText, setSearchText] = useState('');
     const [reclamos, setReclamos] = useState([]);
     const [dni, setDni] = useState('');
-    const [viewMode, setViewMode] = useState('all'); // 'all' or 'mine'
+    const [viewMode, setViewMode] = useState('all');
 
     const navigate = useNavigate();
 
@@ -26,9 +26,15 @@ const Reclamos = () => {
       };
       const fetchReclamos = async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/reclamos');
-          const data = await response.json();
-          setReclamos(data);
+          const response1 = await fetch(`http://localhost:8080/api/reclamos`);
+          const data1 = await response1.json();
+    
+          const response2 = await fetch(`http://localhost:8080/api/reclamosInspector`);
+          const data2 = await response2.json();
+    
+          const combinedData = [...data1, ...data2];
+    
+          setReclamos(combinedData);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -106,6 +112,7 @@ const Reclamos = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: '#f5f5f5', // Softer background color
     },
     inputContainer: {
       flexDirection: 'row',
@@ -160,7 +167,7 @@ const Reclamos = () => {
         fontSize: 16,
       },
       button: {
-        backgroundColor: 'gray',
+        backgroundColor: "#96B6CE",
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 20,
@@ -181,7 +188,8 @@ const Reclamos = () => {
       },
       seguimiento: {
         fontSize: 16,
-        color: "#ffffff"
+        color: "#ffffff",
+        fontWeight: "bold",
       },
       buttonContainer: {
         flexDirection: 'row',

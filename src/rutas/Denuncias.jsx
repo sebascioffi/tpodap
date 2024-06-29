@@ -7,33 +7,52 @@ const Denuncias = () => {
 
     const [searchText, setSearchText] = useState('');
     const [denuncias, setDenuncias] = useState([]);
-    const [dni, setDni] = useState('');
+    const [viewMode, setViewMode] = useState('generadas');
 
     const navigate = useNavigate();
+
+    const getDni = async () => {
+      try {
+        const dni = await AsyncStorage.getItem('userDni');
+        if (dni !== null) {
+          return dni;
+        } else {
+          return null;
+        }
+      } catch (error) {
+        console.error('Error recuperando el DNI:', error);
+        return null;
+      }
+    };
 
     useEffect(() => {
       const fetchDenuncias = async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/denuncias');
-          const data = await response.json();
-          const storedDni = await AsyncStorage.getItem('userDni');
-
-          // Filtrar las denuncias cuyo documento sea igual al dni
-          const denunciasFiltradas = data.filter(denuncia => denuncia.documento === storedDni);
-          
-          setDenuncias(denunciasFiltradas);
+          const storedDni = await getDni();
+    
+          let data = [];
+          if (viewMode === 'generadas') {
+            const response = await fetch('http://localhost:8080/api/denuncias');
+            data = await response.json();
+            // Filtrar las denuncias cuyo documento sea igual al dni
+            data = data.filter(denuncia => denuncia.documento === storedDni);
+          } else if (viewMode === 'recibidas') {
+            const response = await fetch(`http://localhost:8080/api/denuncias/vecinosDenunciados/${storedDni}`);
+            data = await response.json();
+          }
+    
+          setDenuncias(data);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
       };
-  
+    
       fetchDenuncias();
-    }, []);
+    }, [viewMode]);
 
-    const filteredDenuncias = denuncias.filter(den => {
+    const filteredDenuncias = Array.isArray(denuncias) ? denuncias.filter(den => {
       return den.idDenuncia.toString().includes(searchText);
-    });
-
+    }) : [];
     
     return (
         <View style={styles.container}>
@@ -44,8 +63,20 @@ const Denuncias = () => {
         />
         </Pressable>
         <View style={styles.buttonContainer}>
+        <Pressable
+          style={[styles.buttonView, viewMode === 'generadas' && styles.selectedButton]}
+          onPress={() => setViewMode('generadas')}
+        >
+          <Text>Ver generadas</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.buttonView, viewMode === 'recibidas' && styles.selectedButton]}
+          onPress={() => setViewMode('recibidas')}
+        >
+          <Text>Ver recibidas</Text>
+        </Pressable>
       </View>
-          <View style={styles.inputContainer}>
+        <View style={styles.inputContainer}>
             <Image
               source={require('../imagenes/lupa.png')} // Asegúrate de tener esta imagen en tu carpeta de imágenes
               style={styles.icon}
@@ -78,97 +109,100 @@ const Denuncias = () => {
       );
     };
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#d3d3d3',
-      borderRadius: 25, 
-      paddingHorizontal: 10,
-      paddingVertical: 10,
-      marginTop: 20,
-      marginBottom:20,
-      width: 250, 
-      position: 'relative', 
-    },
-    icon: {
-      width: 20, 
-      height: 20,
-      position: 'absolute',
-      left: 10, 
-      zIndex: 1, 
-    },
-    input: {
-      flex: 1,
-      height: 40,
-      color: 'black',
-      fontSize: 16,
-      paddingLeft: 40, 
-      outlineStyle: 'none',
-    },
-      backArrow: {
-        position: 'absolute',
-        top: 20, // Ajusta según sea necesario para que esté bien alineado
-        left: 20,
-      },
-      arrowImage: {
-        width: 24, // Ajusta el tamaño de la flecha según sea necesario
-        height: 24,
-      },
-      scrollContainer: {
-        padding: 10,
-      },
-      reclamoContainer: {
-        marginBottom: 20,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 10,
-        backgroundColor: '#f9f9f9',
-        width: 250,
-      },
-      reclamoText: {
-        marginBottom: 5,
-        fontSize: 16,
-      },
-      button: {
-        backgroundColor: 'gray',
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 20,
+  
+    const styles = StyleSheet.create({
+      container: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 10,
+        backgroundColor: '#f5f5f5', // Softer background color
       },
-      buttonView: {
-        backgroundColor: '#293EFA',
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 20,
-        alignItems: 'center',
-        marginTop: 10,
-      },
-      buttonText: {
-        color: 'white',
-        fontSize: 16,
-      },
-      seguimiento: {
-        fontSize: 16,
-        color: "#ffffff"
-      },
-      buttonContainer: {
+      inputContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop:100,
+        alignItems: 'center',
+        backgroundColor: '#d3d3d3',
+        borderRadius: 25, 
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        marginTop: 20,
+        marginBottom:20,
+        width: 250, 
+        position: 'relative', 
       },
-      selectedButton: {
-        backgroundColor: '#9BA4FA', // Color de fondo para el botón seleccionado
+      icon: {
+        width: 20, 
+        height: 20,
+        position: 'absolute',
+        left: 10, 
+        zIndex: 1, 
       },
-  });
+      input: {
+        flex: 1,
+        height: 40,
+        color: 'black',
+        fontSize: 16,
+        paddingLeft: 40, 
+        outlineStyle: 'none',
+      },
+        backArrow: {
+          position: 'absolute',
+          top: 20, // Ajusta según sea necesario para que esté bien alineado
+          left: 20,
+        },
+        arrowImage: {
+          width: 24, // Ajusta el tamaño de la flecha según sea necesario
+          height: 24,
+        },
+        scrollContainer: {
+          padding: 10,
+        },
+        reclamoContainer: {
+          marginBottom: 20,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: '#ddd',
+          borderRadius: 10,
+          backgroundColor: '#f9f9f9',
+          width: 250,
+        },
+        reclamoText: {
+          marginBottom: 5,
+          fontSize: 16,
+        },
+        button: {
+          backgroundColor: "#96B6CE",
+          paddingVertical: 10,
+          paddingHorizontal: 15,
+          borderRadius: 20,
+          alignItems: 'center',
+          marginTop: 10,
+        },
+        buttonView: {
+          backgroundColor: '#293EFA',
+          paddingVertical: 10,
+          paddingHorizontal: 15,
+          borderRadius: 20,
+          alignItems: 'center',
+          marginTop: 10,
+        },
+        buttonText: {
+          color: 'white',
+          fontSize: 16,
+        },
+        seguimiento: {
+          fontSize: 16,
+          color: "#ffffff",
+          fontWeight: "bold",
+        },
+        buttonContainer: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginTop:100,
+        },
+        selectedButton: {
+          backgroundColor: '#9BA4FA', // Color de fondo para el botón seleccionado
+        },
+    });
   
   export default Denuncias;
 

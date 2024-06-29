@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   image: {
     width: screenWidth,
@@ -184,30 +185,48 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: '100%',
-    height: 40,
-    borderBottomWidth: 1,
-    borderBottomColor: 'black',
-    marginBottom: 20,
-    color: 'black',
-    fontSize: 16,
-    textAlign: 'center',
+    width: '80%', // Ajustar el ancho para un mejor diseño
+    height: 50, // Aumentar la altura para una mejor accesibilidad
+    borderWidth: 1, // Borde alrededor del input
+    borderColor: '#6BAADB', // Color de borde que combina con los botones
+    borderRadius: 10, // Bordes redondeados para un aspecto moderno
+    marginBottom: 20, // Espacio entre los inputs
+    color: 'black', // Color del texto
+    fontSize: 16, // Tamaño de la fuente
+    backgroundColor: '#fff', // Fondo blanco para contraste
+    shadowColor: '#000', // Sombra para profundidad
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 5,
+    textAlign: 'center', // Alinear texto al centro
     outlineStyle: 'none',
   },
   button: {
-    backgroundColor: 'black',
+    backgroundColor: '#6BAADB', // Softer, more appealing color
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 5,
     alignItems: 'center',
     width: '30%',
     marginBottom: 30,
+    borderRadius: 25, // More rounded corners for a modern look
+    shadowColor: '#000', // Adding shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   buttonaceptar: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     alignItems: 'center',
+    borderRadius: 25, // More rounded corners for a modern look
+    shadowColor: '#000', // Adding shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   acceptButton: {
     backgroundColor: 'green',
@@ -215,6 +234,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: "bold",
   },
   linkText: {
       color: 'black',
@@ -261,11 +281,11 @@ const styles = StyleSheet.create({
       zIndex: 1,
     },
     modalExitoContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-      },
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#f5f5f5', // Softer background color
+    },
       boldText: {
         fontSize: 23,
         fontWeight: 'bold',

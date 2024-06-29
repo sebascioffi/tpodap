@@ -26,15 +26,21 @@ const ReclamosInspector = () => {
               console.error('Error retrieving DNI:', error);
             }
           };
-      const fetchReclamos = async () => {
-        try {
-          const response = await fetch(`http://localhost:8080/api/reclamos/filtrarPorInspector/${legajo}`);
-          const data = await response.json();
-          setReclamos(data);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
+          const fetchReclamos = async () => {
+            try {
+              const response1 = await fetch(`http://localhost:8080/api/reclamos/filtrarPorInspector/${legajo}`);
+              const data1 = await response1.json();
+        
+              const response2 = await fetch(`http://localhost:8080/api/reclamosInspector/filtrarPorInspector/${legajo}`);
+              const data2 = await response2.json();
+        
+              const combinedData = [...data1, ...data2];
+        
+              setReclamos(combinedData);
+            } catch (error) {
+              console.error('Error fetching data:', error);
+            }
+          };
   
       fetchReclamos();
       fetchDni();
@@ -59,7 +65,7 @@ const ReclamosInspector = () => {
 
     const filteredReclamos = reclamos.length > 0 ? reclamos.filter(rec => {
         if (viewMode === 'mine') {
-          return rec.documento === dni && rec.idReclamo.toString().includes(searchText);
+          return rec.legajo.toString() === legajo && rec.idReclamo.toString().includes(searchText);
         }
         return rec.idReclamo.toString().includes(searchText);
       }) : [];
@@ -126,6 +132,7 @@ const ReclamosInspector = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: '#f5f5f5', // Softer background color
     },
     inputContainer: {
       flexDirection: 'row',
@@ -180,7 +187,7 @@ const ReclamosInspector = () => {
         fontSize: 16,
       },
       button: {
-        backgroundColor: 'gray',
+        backgroundColor: "#96B6CE",
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 20,
@@ -201,7 +208,8 @@ const ReclamosInspector = () => {
       },
       seguimiento: {
         fontSize: 16,
-        color: "#ffffff"
+        color: "#ffffff",
+        fontWeight: "bold",
       },
       buttonContainer: {
         flexDirection: 'row',

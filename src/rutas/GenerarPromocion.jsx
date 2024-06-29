@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   title: {
     fontSize: 24,
@@ -54,17 +55,23 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   button: {
-    backgroundColor: '#0066FF',
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 5,
     alignItems: 'center',
     width: '50%',
     margin: 15,
+    backgroundColor: '#6BAADB', // Softer, more appealing color
+    borderRadius: 25, // More rounded corners for a modern look
+    shadowColor: '#000', // Adding shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: "bold"
   },
 });
 

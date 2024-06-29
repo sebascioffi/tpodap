@@ -18,6 +18,7 @@ const GenerarComercio = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalErrorVisible, setModalErrorVisible] = useState(false);
+  const [modalError2Visible, setModalError2Visible] = useState(false);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
 
   const navigate = useNavigate();
@@ -31,6 +32,10 @@ const GenerarComercio = () => {
     setModalVisible(false);
   };
 
+  const handleCloseModal2 = () => {
+    setModalError2Visible(false);
+  };
+
   const handleArchivo = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -40,7 +45,14 @@ const GenerarComercio = () => {
       });
       if (!result.canceled) {
         const asset = result.assets[0];
-        setArchivos(prevArchivos => [...prevArchivos, asset]);
+        setArchivos(prevArchivos => {
+          if (prevArchivos.length < 5) {
+            return [...prevArchivos, asset];
+          } else {
+            setModalError2Visible(true);
+            return prevArchivos;
+          }
+        });
       }
     } catch (err) {
       console.error("Error al seleccionar archivos:", err);
@@ -139,7 +151,7 @@ const GenerarComercio = () => {
 
       <Text style={styles.label}>Adjuntar fotos:</Text>
       <Pressable style={styles.input} onPress={handleArchivo}>
-        <Text style={styles.uploadButtonText}>Seleccionar Archivo</Text>
+        <Text style={styles.uploadButtonText}>Seleccionar Archivo - Máximo 5</Text>
       </Pressable>
 
       {archivos.length > 0 && (
@@ -166,7 +178,7 @@ const GenerarComercio = () => {
       >
         <View style={styles.modalContainer}>
           <Pressable onPress={handleCloseModal} style={styles.closeButton}>
-            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} tintColor={'white'} />
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} tintColor={'black'} />
           </Pressable>
           <Image source={{ uri: selectedImage?.uri }} style={styles.fullImage} resizeMode="contain" />
         </View>
@@ -182,6 +194,21 @@ const GenerarComercio = () => {
             <Text style={styles.modalErrorText}>Debes completar todos los datos obligatorios</Text>
           </View>
           <Pressable onPress={() => setModalErrorVisible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={modalError2Visible}
+        transparent={true}
+        onRequestClose={handleCloseModal2}
+      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>El máximo de fotos es 5</Text>
+          </View>
+          <Pressable onPress={() => setModalError2Visible(false)} style={styles.closeErrorButton}>
             <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
           </Pressable>
         </View>
@@ -216,7 +243,8 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         padding: 20,
         justifyContent: 'center',
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       label: {
         fontSize: 16,
@@ -225,28 +253,45 @@ const styles = StyleSheet.create({
       },
       input: {
         borderWidth: 1,
-        borderColor: '#AEAEAE',
-        borderRadius: 5,
         marginBottom: 10,
         padding: 10,
-        width: "100%",
         fontSize: 16,
+        outlineStyle: 'none',
+        width: '100%', // Ajustar el ancho para un mejor diseño
+        height: 40, // Aumentar la altura para una mejor accesibilidad
+        borderColor: '#6BAADB', // Color de borde que combina con los botones
+        borderRadius: 10, // Bordes redondeados para un aspecto moderno
+        color: 'black', // Color del texto
+        backgroundColor: '#fff', // Fondo blanco para contraste
+        shadowColor: '#000', // Sombra para profundidad
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 5,
         outlineStyle: 'none',
       },
       textArea: {
         height: 100,
       },
       submitButton: {
-        backgroundColor: 'black',
         padding: 9,
         alignItems: 'center',
-        borderRadius: 5,
         width: 70,
         marginTop: 10,
+        backgroundColor: '#6BAADB', // Softer, more appealing color
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        borderRadius: 25, // More rounded corners for a modern look
+        shadowColor: '#000', // Adding shadow for depth
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
       },
       submitButtonText: {
         color: 'white',
         fontSize: 16,
+        fontWeight: "bold"
       },
       pickerContainer: {
         marginBottom: 10,
@@ -296,7 +341,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'black',
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       closeButton: {
         position: 'absolute',
@@ -339,11 +384,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'transparent',
+        backgroundColor: '#f5f5f5', // Softer background color
       },
       labelExito: {
         fontSize: 16,
         marginVertical: 10,
+      },
+      detallesInput:{
+        height: 55,
       }
 });
 

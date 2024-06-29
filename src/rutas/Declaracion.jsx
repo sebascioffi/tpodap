@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f5f5f5', // Softer background color
   },
   image: {
     width: screenWidth,
