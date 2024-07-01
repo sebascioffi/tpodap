@@ -11,6 +11,7 @@ const LoginVecino = () => {
 
   const [modalError2Visible, setModalError2Visible] = useState(false);
   const [modalError3Visible, setModalError3Visible] = useState(false);
+  const [modalMailVisible, setModalMailVisible] = useState(false);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
 
 
@@ -18,6 +19,11 @@ const LoginVecino = () => {
     dni: '',
     email: ''
   });
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+};
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -28,9 +34,11 @@ const LoginVecino = () => {
 };
 
 const handleSubmit = async (event) => {
-  if (formData.dni == "" || formData.password == ""){
-    setModalError2Visible(true)
-  } else{
+  if (formData.dni === "" || formData.email === "") {
+    setModalError2Visible(true);
+  } else if (!validateEmail(formData.email)) {
+    setModalMailVisible(true);
+  } else {
     event.preventDefault();
     try {
       const response2 = await fetch('http://localhost:8080/api/usuario/solicitudClave', {
@@ -120,6 +128,18 @@ const handleSubmit = async (event) => {
             <Text style={styles.modalErrorText}>Vecino no encontrado</Text>
           </View>
           <Pressable onPress={() => setModalError3Visible(false)} style={styles.closeErrorButton}>
+            <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
+          </Pressable>
+        </View>
+      </Modal>
+      <Modal
+        visible={modalMailVisible}
+        transparent={true}      >
+        <View style={styles.modalErrorContainer}>
+          <View style={styles.redModal}>
+            <Text style={styles.modalErrorText}>Email inválido</Text>
+          </View>
+          <Pressable onPress={() => setModalMailVisible(false)} style={styles.closeErrorButton}>
             <Image source={require('../imagenes/cerrar.png')} style={styles.closeIcon} />
           </Pressable>
         </View>
