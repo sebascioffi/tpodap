@@ -159,7 +159,7 @@ const GenerarReclamoInspector = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({legajo:legajo,idSitio:lugarActualizado, idDesperfecto:desperfecto,descripcion:detallesActualizados,estado:"Iniciado"})
+            body: JSON.stringify({legajo:legajo,idSitio:lugarActualizado, idDesperfecto:desperfecto,descripcion:detallesActualizados,estado:"Pendiente"})
         });
             const responseData = await response.json();
             setNumReclamo(responseData.id);

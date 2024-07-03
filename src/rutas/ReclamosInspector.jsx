@@ -63,11 +63,11 @@ const ReclamosInspector = () => {
         fetchInspectorData();
       }, [legajo]);
 
-    const filteredReclamos = reclamos.length > 0 ? reclamos.filter(rec => {
+      const filteredReclamos = reclamos.length > 0 ? reclamos.filter(rec => {
         if (viewMode === 'mine') {
-          return rec.legajo.toString() === legajo && rec.idReclamo.toString().includes(searchText);
+          return rec.legajo && rec.idReclamo && rec.legajo.toString() === legajo && rec.idReclamo.toString().includes(searchText);
         }
-        return rec.idReclamo.toString().includes(searchText);
+        return rec.idReclamo && rec.idReclamo.toString().includes(searchText);
       }) : [];
 
     
